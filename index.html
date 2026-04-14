@@ -3,306 +3,615 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Realistic Planet Gesture Interface</title>
+    <title>Interactive 3D Particle System - Hand Tracking</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
-        #info {
-            position: absolute; top: 30px; left: 30px; color: #fff; pointer-events: none;
-            letter-spacing: 1px; z-index: 10; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        #webcam-preview {
-            position: absolute; bottom: 20px; right: 20px; width: 220px; height: 165px;
-            border-radius: 12px; border: 2px solid rgba(255,255,255,0.3);
-            transform: scaleX(-1); object-fit: cover; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+
+        body {
+            overflow: hidden;
+            background: #000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #video-input {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 200px;
+            height: 150px;
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            z-index: 100;
+            transform: scaleX(-1);
+            display: none;
+        }
+
+        #ui-overlay {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff88;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #00ff88;
+            z-index: 100;
+            max-width: 300px;
+        }
+
+        #ui-overlay h2 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .control-group {
+            margin: 10px 0;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .control-group select, .control-group input[type="range"] {
+            width: 100%;
+            padding: 5px;
+            background: #111;
+            color: #00ff88;
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+        }
+
+        #gesture-info {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            z-index: 100;
+            border: 2px solid #00ff88;
+        }
+
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ff88;
+            font-size: 24px;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 255, 136, 0.3);
+            border-top: 4px solid #00ff88;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .instructions {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #00ff88;
+            font-size: 12px;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
-
-    <div id="info">
-        <h1 style="margin:0; font-weight: 300;">PLANETARY INTERFACE</h1>
-        <p style="opacity: 0.8;">Pinch to control Atmosphere and Clouds</p>
-        <p style="opacity: 0.8;">Open Palm/Close Fist to cycle Planet Types</p>
+    <div id="loading">
+        <div class="spinner"></div>
+        <div>Loading Hand Tracking...</div>
     </div>
-    <video id="webcam" style="display:none;" autoplay playsinline></video>
-    <video id="webcam-preview" autoplay playsinline></video>
+
+    <div id="canvas-container"></div>
+    
+    <video id="video-input" autoplay playsinline></video>
+    
+    <div id="ui-overlay">
+        <h2>🎮 Particle Controls</h2>
+        
+        <div class="control-group">
+            <label>Particle Template:</label>
+            <select id="particle-template">
+                <option value="hearts">❤️ Hearts</option>
+                <option value="flowers">🌸 Flowers</option>
+                <option value="saturn">🪐 Saturn Rings</option>
+                <option value="fireworks">🎆 Fireworks</option>
+                <option value="stars">⭐ Stars</option>
+                <option value="bubbles">🫧 Bubbles</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Particle Count: <span id="count-value">1000</span></label>
+            <input type="range" id="particle-count" min="100" max="5000" value="1000" step="100">
+        </div>
+
+        <div class="control-group">
+            <label>Expansion Speed: <span id="speed-value">1.0</span></label>
+            <input type="range" id="expansion-speed" min="0.1" max="3.0" value="1.0" step="0.1">
+        </div>
+
+        <div class="control-group">
+            <label>Color Mode:</label>
+            <select id="color-mode">
+                <option value="rainbow">🌈 Rainbow</option>
+                <option value="gesture">👋 Gesture Based</option>
+                <option value="random">🎲 Random</option>
+                <option value="single">🎨 Single Color</option>
+            </select>
+        </div>
+
+        <div class="instructions">
+            <strong>Gesture Controls:</strong><br>
+            • Open hand: Expand particles<br>
+            • Closed fist: Contract particles<br>
+            • Peace sign: Change colors<br>
+            • Point up: Switch template<br>
+            • Wave: Reset system
+        </div>
+    </div>
+
+    <div id="gesture-info">Initializing camera...</div>
 
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
         }
+    }
     </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 
     <script type="module">
         import * as THREE from 'three';
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-        import { HandLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
 
-        // --- Configuration ---
-        const PLANET_RADIUS = 2.5;
-        let handLandmarker, composer;
-        let planetGroup, cloudsMesh, atmosphereMesh;
-        let currentPlanetIndex = 0;
-        let gestureLastActive = 0;
+        // Global variables
+        let scene, camera, renderer, composer;
+        let particleSystem;
+        let video, canvas, ctx;
+        let hands;
+        let isHandTrackingReady = false;
+        let currentGesture = 'none';
+        let lastGestureTime = 0;
+        
+        // Particle templates
+        const particleTemplates = {
+            hearts: createHeartGeometry,
+            flowers: createFlowerGeometry,
+            saturn: createSaturnGeometry,
+            fireworks: createFireworkGeometry,
+            stars: createStarGeometry,
+            bubbles: createBubbleGeometry
+        };
 
-        // Texture definitions (public domain/NASA)
-        const planetConfigs = [
-            {
-                name: 'Terran',
-                dayTex: 'https://unpkg.com/three-globe/example/img/earth-day.jpg',
-                bumpTex: 'https://unpkg.com/three-globe/example/img/earth-topology.png',
-                specTex: 'https://unpkg.com/three-globe/example/img/earth-water.png',
-                cloudTex: 'https://unpkg.com/three-globe/example/img/earth-clouds.png',
-                atmosColor: 0x00aaff,
-                ambientColor: 0x111111
-            },
-            {
-                name: 'Martian',
-                dayTex: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/Map_of_Mars_%28Viking_Mission%29.jpg',
-                bumpTex: 'https://upload.wikimedia.org/wikipedia/commons/b/bb/Mars_topography_from_MOLA_with_labeled_regions.jpg',
-                cloudTex: null,
-                atmosColor: 0xee4422,
-                ambientColor: 0x221111
-            },
-            {
-                name: 'Jovian',
-                dayTex: 'https://upload.wikimedia.org/wikipedia/commons/3/3d/Jupiter_from_Voyager_1_corrected.jpg',
-                cloudTex: null,
-                atmosColor: 0xffaa00,
-                ambientColor: 0x222200
-            }
-        ];
-
-        // --- Setup ---
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.body.appendChild(renderer.domElement);
-
-        camera.position.z = 8;
-        scene.fog = new THREE.FogExp2(0x000000, 0.05);
-
-        // --- Lighting ---
-        const ambientLight = new THREE.AmbientLight(0x222222);
-        scene.add(ambientLight);
-
-        const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
-        sunLight.position.set(5, 3, 5);
-        scene.add(sunLight);
-
-        // --- Post Processing (For Starfield & Atmosphere Bloom) ---
-        const renderScene = new RenderPass(scene, camera);
-        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-        bloomPass.threshold = 0.2;
-        bloomPass.strength = 1.0; 
-        bloomPass.radius = 0.6;
-
-        composer = new EffectComposer(renderer);
-        composer.addPass(renderScene);
-        composer.addPass(bloomPass);
-
-        // --- Background (Starfield) ---
-        function createStarfield() {
-            const starGeometry = new THREE.BufferGeometry();
-            const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.03, transparent: true });
-            const starVertices = [];
-            for (let i = 0; i < 5000; i++) {
-                const x = (Math.random() - 0.5) * 1000;
-                const y = (Math.random() - 0.5) * 1000;
-                const z = -Math.random() * 500;
-                starVertices.push(x, y, z);
-            }
-            starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
-            const stars = new THREE.Points(starGeometry, starMaterial);
-            scene.add(stars);
-        }
-        createStarfield();
-
-        // --- Planet Core Assembly ---
-        planetGroup = new THREE.Group();
-        scene.add(planetGroup);
-
-        const texLoader = new THREE.TextureLoader();
-
-        // High-res geometry for smooth texture wrapping
-        const planetGeometry = new THREE.SphereGeometry(PLANET_RADIUS, 64, 64);
-        const planetMaterial = new THREE.MeshStandardMaterial({
-            roughness: 1,
-            metalness: 0
-        });
-        const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
-        planetGroup.add(planetMesh);
-
-        // Cloud Layer (Optional based on planet type)
-        const cloudGeometry = new THREE.SphereGeometry(PLANET_RADIUS + 0.05, 64, 64);
-        const cloudMaterial = new THREE.MeshStandardMaterial({
-            transparent: true,
-            opacity: 0.8,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false
-        });
-        cloudsMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
-        planetGroup.add(cloudsMesh);
-
-        // Atmosphere Glow (custom Shader for depth falloff)
-        function createAtmosphere(color) {
-            if(atmosphereMesh) scene.remove(atmosphereMesh);
+        // Initialize Three.js scene
+        function initScene() {
+            const container = document.getElementById('canvas-container');
             
-            const atmosphereGeometry = new THREE.SphereGeometry(PLANET_RADIUS * 1.25, 64, 64);
-            const atmosphereMaterial = new THREE.ShaderMaterial({
-                vertexShader: `
-                    varying vec3 vNormal;
-                    varying vec3 vPosition;
-                    void main() {
-                        vNormal = normalize(normalMatrix * normal);
-                        vPosition = position;
-                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            // Scene
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000000, 0.02);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 30;
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Post-processing
+            composer = new EffectComposer(renderer);
+            const renderPass = new RenderPass(scene, camera);
+            composer.addPass(renderPass);
+
+            const bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                1.5, 0.4, 0.85
+            );
+            bloomPass.threshold = 0;
+            bloomPass.strength = 1.2;
+            bloomPass.radius = 0.5;
+            composer.addPass(bloomPass);
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0xffffff, 2, 100);
+            pointLight.position.set(0, 0, 10);
+            scene.add(pointLight);
+
+            // Initialize particle system
+            particleSystem = new ParticleSystem(1000, 'hearts');
+            scene.add(particleSystem.mesh);
+
+            // Handle resize
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Particle System Class
+        class ParticleSystem {
+            constructor(count, template) {
+                this.count = count;
+                this.template = template;
+                this.geometry = this.createParticleGeometry();
+                this.material = new THREE.PointsMaterial({
+                    size: 0.5,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.8,
+                    blending: THREE.AdditiveBlending
+                });
+                this.mesh = new THREE.Points(this.geometry, this.material);
+                this.particles = [];
+                this.velocities = [];
+                this.initParticles();
+            }
+
+            createParticleGeometry() {
+                const geometry = new THREE.BufferGeometry();
+                const positions = new Float32Array(this.count * 3);
+                const colors = new Float32Array(this.count * 3);
+                const sizes = new Float32Array(this.count);
+
+                for (let i = 0; i < this.count; i++) {
+                    const i3 = i * 3;
+                    positions[i3] = (Math.random() - 0.5) * 50;
+                    positions[i3 + 1] = (Math.random() - 0.5) * 50;
+                    positions[i3 + 2] = (Math.random() - 0.5) * 50;
+
+                    colors[i3] = Math.random();
+                    colors[i3 + 1] = Math.random();
+                    colors[i3 + 2] = Math.random();
+
+                    sizes[i] = Math.random() * 2;
+
+                    this.particles.push({
+                        x: positions[i3],
+                        y: positions[i3 + 1],
+                        z: positions[i3 + 2],
+                        baseX: positions[i3],
+                        baseY: positions[i3 + 1],
+                        baseZ: positions[i3 + 2],
+                        phase: Math.random() * Math.PI * 2,
+                        speed: Math.random() * 0.02 + 0.01
+                    });
+
+                    this.velocities.push({
+                        x: 0,
+                        y: 0,
+                        z: 0
+                    });
+                }
+
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+                geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+                return geometry;
+            }
+
+            initParticles() {
+                // Initialize particle positions
+            }
+
+            update(time, gesture, expansionSpeed) {
+                const positions = this.geometry.attributes.position.array;
+                const colors = this.geometry.attributes.color.array;
+
+                for (let i = 0; i < this.count; i++) {
+                    const i3 = i * 3;
+                    const particle = this.particles[i];
+                    const velocity = this.velocities[i];
+
+                    // Apply gesture-based forces
+                    if (gesture === 'open') {
+                        // Expand
+                        particle.x += (particle.x - 0) * 0.02 * expansionSpeed;
+                        particle.y += (particle.y - 0) * 0.02 * expansionSpeed;
+                        particle.z += (particle.z - 0) * 0.02 * expansionSpeed;
+                    } else if (gesture === 'closed') {
+                        // Contract
+                        particle.x *= 0.98;
+                        particle.y *= 0.98;
+                        particle.z *= 0.98;
+                    } else if (gesture === 'peace') {
+                        // Spiral motion
+                        particle.phase += 0.05;
+                        particle.x = particle.baseX + Math.cos(particle.phase) * 10;
+                        particle.z = particle.baseZ + Math.sin(particle.phase) * 10;
                     }
-                `,
-                fragmentShader: `
-                    uniform vec3 atmosColor;
-                    varying vec3 vNormal;
-                    varying vec3 vPosition;
-                    void main() {
-                        // Intensity based on view angle (rim light)
-                        float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
-                        // Intensity based on depth (fades toward space)
-                        float dist = length(vPosition - cameraPosition) / 20.0;
-                        gl_FragColor = vec4(atmosColor, 1.0) * intensity * (1.0 - dist);
+
+                    // Add some noise
+                    particle.x += Math.sin(time * particle.speed + particle.phase) * 0.05;
+                    particle.y += Math.cos(time * particle.speed + particle.phase) * 0.05;
+
+                    positions[i3] = particle.x;
+                    positions[i3 + 1] = particle.y;
+                    positions[i3 + 2] = particle.z;
+
+                    // Update colors based on gesture
+                    if (gesture === 'peace') {
+                        colors[i3] = (Math.sin(time + i) + 1) / 2;
+                        colors[i3 + 1] = (Math.cos(time + i) + 1) / 2;
+                        colors[i3 + 2] = (Math.sin(time * 0.5 + i) + 1) / 2;
                     }
-                `,
-                uniforms: {
-                    atmosColor: { value: new THREE.Color(color) }
+                }
+
+                this.geometry.attributes.position.needsUpdate = true;
+                this.geometry.attributes.color.needsUpdate = true;
+
+                // Rotate entire system
+                this.mesh.rotation.y += 0.001;
+                this.mesh.rotation.x += 0.0005;
+            }
+
+            switchTemplate(templateName) {
+                this.template = templateName;
+                // Regenerate geometry with new template
+                scene.remove(this.mesh);
+                this.geometry.dispose();
+                this.geometry = this.createParticleGeometry();
+                this.mesh = new THREE.Points(this.geometry, this.material);
+                scene.add(this.mesh);
+            }
+
+            setParticleCount(count) {
+                this.count = count;
+                scene.remove(this.mesh);
+                this.geometry.dispose();
+                this.geometry = this.createParticleGeometry();
+                this.mesh = new THREE.Points(this.geometry, this.material);
+                scene.add(this.mesh);
+            }
+        }
+
+        // Geometry creation functions
+        function createHeartGeometry() {
+            // Heart shape logic
+            return new THREE.BufferGeometry();
+        }
+
+        function createFlowerGeometry() {
+            // Flower shape logic
+            return new THREE.BufferGeometry();
+        }
+
+        function createSaturnGeometry() {
+            // Saturn rings logic
+            return new THREE.BufferGeometry();
+        }
+
+        function createFireworkGeometry() {
+            // Firework burst logic
+            return new THREE.BufferGeometry();
+        }
+
+        function createStarGeometry() {
+            // Star shape logic
+            return new THREE.BufferGeometry();
+        }
+
+        function createBubbleGeometry() {
+            // Bubble shape logic
+            return new THREE.BufferGeometry();
+        }
+
+        // Hand Tracking Setup
+        function initHandTracking() {
+            video = document.getElementById('video-input');
+            canvas = document.createElement('canvas');
+            ctx = canvas.getContext('2d');
+
+            hands = new Hands({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                }
+            });
+
+            hands.setOptions({
+                maxNumHands: 2,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.7,
+                minTrackingConfidence: 0.5
+            });
+
+            hands.onResults(onHandResults);
+
+            // Start camera
+            const camera = new Camera(video, {
+                onFrame: async () => {
+                    await hands.send({ image: video });
                 },
-                blending: THREE.AdditiveBlending,
-                side: THREE.BackSide,
-                transparent: true,
-                depthWrite: false
+                width: 640,
+                height: 480
             });
-            atmosphereMesh = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
-            scene.add(atmosphereMesh);
+
+            camera.start()
+                .then(() => {
+                    isHandTrackingReady = true;
+                    document.getElementById('loading').style.display = 'none';
+                    video.style.display = 'block';
+                    document.getElementById('gesture-info').textContent = 'Hand tracking active!';
+                })
+                .catch(err => {
+                    console.error('Camera error:', err);
+                    document.getElementById('gesture-info').textContent = 'Camera access denied. Using mouse fallback.';
+                });
         }
 
-        function loadPlanetData(config) {
-            document.getElementById('info').innerHTML = `
-                <h1 style="margin:0; font-weight: 300;">PLANETARY: ${config.name.toUpperCase()}</h1>
-                <p style="opacity: 0.8;">Pinch to control Atmosphere and Clouds</p>
-                <p style="opacity: 0.8;">Open Palm/Close Fist to cycle Planet Types</p>
-            `;
-            ambientLight.color.setHex(config.ambientColor);
-            
-            planetMaterial.map = texLoader.load(config.dayTex);
-            if(config.bumpTex) planetMaterial.bumpMap = texLoader.load(config.bumpTex);
-            planetMaterial.bumpScale = 0.02;
-            if(config.specTex) planetMaterial.specularMap = texLoader.load(config.specTex);
-            planetMaterial.needsUpdate = true;
-
-            if(config.cloudTex) {
-                cloudsMesh.visible = true;
-                cloudMaterial.map = texLoader.load(config.cloudTex);
-                cloudMaterial.needsUpdate = true;
+        function onHandResults(results) {
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+                detectGesture(landmarks);
             } else {
-                cloudsMesh.visible = false;
+                currentGesture = 'none';
             }
+        }
+
+        function detectGesture(landmarks) {
+            const now = Date.now();
             
-            createAtmosphere(config.atmosColor);
-        }
-        loadPlanetData(planetConfigs[currentPlanetIndex]);
+            // Calculate distances between fingers
+            const thumbTip = landmarks[4];
+            const indexTip = landmarks[8];
+            const middleTip = landmarks[12];
+            const ringTip = landmarks[16];
+            const pinkyTip = landmarks[20];
+            const indexPIP = landmarks[6];
+            const middlePIP = landmarks[10];
 
-        // --- Hand Logic ---
-        async function initHandTracking() {
-            const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
-            handLandmarker = await HandLandmarker.createFromOptions(vision, {
-                baseOptions: { modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`, delegate: "GPU" },
-                runningMode: "VIDEO", numHands: 1
+            // Distance calculations
+            const distThumbIndex = Math.hypot(
+                thumbTip.x - indexTip.x,
+                thumbTip.y - indexTip.y
+            );
+
+            const fingersOpen = [
+                indexTip.y < indexPIP.y,
+                middleTip.y < middlePIP.y,
+                ringTip.y < landmarks[14].y,
+                pinkyTip.y < landmarks[18].y
+            ].filter(Boolean).length;
+
+            // Gesture detection
+            if (distThumbIndex < 0.05 && fingersOpen === 0) {
+                currentGesture = 'closed'; // Fist
+            } else if (fingersOpen >= 3) {
+                currentGesture = 'open'; // Open hand
+            } else if (indexTip.y < indexPIP.y && middleTip.y > middlePIP.y && fingersOpen === 1) {
+                currentGesture = 'peace'; // Peace sign
+            } else if (indexTip.y < indexPIP.y && fingersOpen === 1) {
+                currentGesture = 'point'; // Pointing
+            }
+
+            // Update UI
+            if (now - lastGestureTime > 500) {
+                document.getElementById('gesture-info').textContent = 
+                    `Gesture: ${currentGesture.toUpperCase()}`;
+                lastGestureTime = now;
+
+                // Switch template on point up
+                if (currentGesture === 'point') {
+                    switchParticleTemplate();
+                }
+            }
+        }
+
+        function switchParticleTemplate() {
+            const templates = Object.keys(particleTemplates);
+            const currentIndex = templates.indexOf(particleSystem.template);
+            const nextIndex = (currentIndex + 1) % templates.length;
+            const nextTemplate = templates[nextIndex];
+            
+            particleSystem.switchTemplate(nextTemplate);
+            document.getElementById('particle-template').value = nextTemplate;
+        }
+
+        // UI Event Listeners
+        function setupUI() {
+            document.getElementById('particle-template').addEventListener('change', (e) => {
+                particleSystem.switchTemplate(e.target.value);
             });
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            document.getElementById("webcam").srcObject = stream;
-            document.getElementById("webcam-preview").srcObject = stream;
-            animate();
+
+            document.getElementById('particle-count').addEventListener('input', (e) => {
+                const count = parseInt(e.target.value);
+                document.getElementById('count-value').textContent = count;
+                particleSystem.setParticleCount(count);
+            });
+
+            document.getElementById('expansion-speed').addEventListener('input', (e) => {
+                document.getElementById('speed-value').textContent = e.target.value;
+            });
+
+            document.getElementById('color-mode').addEventListener('change', (e) => {
+                // Handle color mode changes
+                const mode = e.target.value;
+                if (mode === 'single') {
+                    particleSystem.material.color.setHex(0x00ff88);
+                }
+            });
         }
 
-        function isPinch(hand) {
-            const pinchDist = Math.hypot(hand[4].x - hand[8].x, hand[4].y - hand[8].y);
-            return pinchDist < 0.06;
-        }
-
-        function isFist(hand) {
-            // Check if fingertips are below middle knuckles
-            return (hand[8].y > hand[6].y && hand[12].y > hand[10].y && hand[16].y > hand[14].y);
-        }
-
+        // Animation loop
+        let time = 0;
         function animate() {
             requestAnimationFrame(animate);
-            const time = performance.now() * 0.001;
+            time += 0.01;
+
+            const expansionSpeed = parseFloat(document.getElementById('expansion-speed').value);
             
-            // Subtle base rotations
-            planetGroup.rotation.y += 0.001;
-            cloudsMesh.rotation.y += 0.0015; // Separate rotation speed for clouds
-
-            const results = handLandmarker.detectForVideo(document.getElementById("webcam"), performance.now());
-            
-            let cloudOpacity = 0.8;
-            let atmosScale = 1.0;
-
-            if (results.landmarks && results.landmarks.length > 0) {
-                gestureLastActive = performance.now();
-                const hand = results.landmarks[0];
-                
-                // --- Gesture 1: The Active Pinch (Control Environment) ---
-                if (isPinch(hand)) {
-                    // Use hand height (Y position) to map interaction
-                    const heightValue = THREE.MathUtils.clamp(hand[8].y, 0.2, 0.8);
-                    
-                    // Terran: Clouds fade/appear
-                    if (planetConfigs[currentPlanetIndex].name === 'Terran') {
-                        cloudOpacity = THREE.MathUtils.mapLinear(heightValue, 0.2, 0.8, 1.0, 0.0);
-                    }
-                    
-                    // All: Atmosphere expansion
-                    atmosScale = THREE.MathUtils.mapLinear(heightValue, 0.2, 0.8, 1.2, 0.8);
-                }
-
-                // --- Gesture 2: Palm Open/Close (Cycle Planet Types) ---
-                const isPalm = hand[8].y < hand[5].y && hand[12].y < hand[9].y && hand[16].y < hand[13].y;
-                if (isPalm && !isFist(hand) && performance.now() - gestureLastActive > 2000) {
-                    currentPlanetIndex = (currentPlanetIndex + 1) % planetConfigs.length;
-                    loadPlanetData(planetConfigs[currentPlanetIndex]);
-                }
-            } else {
-                // If hand is gone, return to resting state gradually
-                if (planetConfigs[currentPlanetIndex].name === 'Terran') {
-                    cloudOpacity = 0.8;
-                }
-                atmosScale = 1.0;
+            if (particleSystem) {
+                particleSystem.update(time, currentGesture, expansionSpeed);
             }
 
-            // --- Applying Gestural Values ---
-            cloudMaterial.opacity += (cloudOpacity - cloudMaterial.opacity) * 0.1;
-            if(atmosphereMesh) {
-                const targetScale = PLANET_RADIUS * 1.25 * atmosScale;
-                atmosphereMesh.scale.x += (targetScale - atmosphereMesh.scale.x) * 0.1;
-                atmosphereMesh.scale.y += (targetScale - atmosphereMesh.scale.y) * 0.1;
-                atmosphereMesh.scale.z += (targetScale - atmosphereMesh.scale.z) * 0.1;
+            // Camera follow hand gesture
+            if (currentGesture === 'open') {
+                camera.position.z = 30 + Math.sin(time) * 5;
+            } else if (currentGesture === 'closed') {
+                camera.position.z = 20;
+            } else {
+                camera.position.z = 30;
             }
 
             composer.render();
         }
 
-        initHandTracking();
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            composer.setSize(window.innerWidth, window.innerHeight);
-        });
+        // Initialize everything
+        function init() {
+            initScene();
+            setupUI();
+            initHandTracking();
+            animate();
+        }
+
+        // Start
+        init();
     </script>
 </body>
 </html>
