@@ -1,580 +1,3089 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stellar Morph</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#000;overflow:hidden;font-family:'SF Pro Display',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-#c{display:block;width:100vw;height:100vh}
-#vid{position:absolute;top:24px;right:24px;width:140px;height:105px;border:1px solid rgba(255,255,255,0.08);border-radius:16px;transform:scaleX(-1);opacity:0.45;z-index:10;transition:opacity 0.4s;object-fit:cover}
-#vid:hover{opacity:0.9}
-#hud{position:absolute;top:24px;left:24px;z-index:10;pointer-events:none}
-#hud-inner{background:rgba(8,8,12,0.72);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:18px 22px;backdrop-filter:blur(20px) saturate(1.5);min-width:210px}
-#shapeName{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:4px;font-weight:500}
-#shapeLabel{font-size:22px;font-weight:300;color:#fff;letter-spacing:1px;margin-bottom:14px}
-.stat-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.stat-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.stat-text{font-size:12px;color:rgba(255,255,255,0.5);letter-spacing:0.3px}
-.stat-val{font-size:12px;color:rgba(255,255,255,0.8);margin-left:auto;font-variant-numeric:tabular-nums}
-#divider{width:100%;height:1px;background:rgba(255,255,255,0.06);margin:12px 0}
-#gestureState{font-size:13px;font-weight:500;letter-spacing:0.5px;margin-bottom:3px;color:#fff}
-#gestureHint{font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.3px}
-#progressBar{width:100%;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:14px;overflow:hidden}
-#progressFill{height:100%;border-radius:2px;transition:width 0.15s ease,background 0.5s ease;width:50%;background:#f97316}
-#legend{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:10}
-.legend-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;border:1px solid rgba(255,255,255,0.08);border-radius:100px;cursor:default;transition:all 0.3s;background:rgba(8,8,12,0.6);backdrop-filter:blur(10px)}
-.legend-btn.active{border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.06)}
-.legend-dot{width:8px;height:8px;border-radius:50%}
-.legend-label{font-size:12px;color:rgba(255,255,255,0.55);letter-spacing:1.5px;text-transform:uppercase;font-weight:500}
-.legend-btn.active .legend-label{color:rgba(255,255,255,0.9)}
-#overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 40% 50%, #0d0d1f 0%, #000 70%)}
-#overlay-content{text-align:center;max-width:480px;padding:40px}
-#logo{font-size:11px;letter-spacing:5px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:24px;font-weight:500}
-#title{font-size:52px;font-weight:200;color:#fff;letter-spacing:-1px;line-height:1.1;margin-bottom:20px}
-#title span{font-weight:500;background:linear-gradient(135deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-#subtitle{font-size:16px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:40px;font-weight:300}
-#startBtn{display:inline-flex;align-items:center;gap:12px;padding:16px 40px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.85);font-size:14px;letter-spacing:2px;cursor:pointer;border-radius:100px;transition:all 0.3s ease;text-transform:uppercase;font-family:inherit;font-weight:500}
-#startBtn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.4);color:#fff;transform:translateY(-1px)}
-#startBtn:active{transform:translateY(0)}
-.btn-icon{width:18px;height:18px;border:1.5px solid currentColor;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.btn-icon::after{content:'';display:block;width:0;height:0;border-style:solid;border-width:4px 0 4px 7px;border-color:transparent transparent transparent currentColor;margin-left:2px}
-#gesture-guide{display:flex;gap:24px;margin-top:40px;padding-top:32px;border-top:1px solid rgba(255,255,255,0.06)}
-.gesture-item{flex:1;text-align:center}
-.gesture-icon{font-size:28px;margin-bottom:8px;display:block}
-.gesture-name{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:3px}
-.gesture-desc{font-size:12px;color:rgba(255,255,255,0.45)}
-#loading-bar{position:fixed;bottom:0;left:0;height:2px;background:linear-gradient(90deg,#a78bfa,#60a5fa);z-index:100;transition:width 0.3s ease;width:0%;opacity:1}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StellarLearn — 3D Interactive Science</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        :root {
+            --bg: #02020c;
+            --panel: rgba(4, 4, 18, 0.94);
+            --panel2: rgba(6, 6, 24, 0.98);
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.12);
+            --accent: #7c6dfa;
+            --accent2: #38d9a9;
+            --text: rgba(255, 255, 255, 0.9);
+            --dim: rgba(255, 255, 255, 0.4);
+            --dim2: rgba(255, 255, 255, 0.6);
+            --red: #ff6b6b;
+            --green: #38d9a9;
+            --blue: #60a5fa;
+            --orange: #fb923c;
+            --purple: #a78bfa;
+            --yellow: #fbbf24;
+            --sw: 260px;
+            --th: 52px;
+            --iw: 300px;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--text)
+        }
+
+        #c {
+            display: block;
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%
+        }
+
+        #lc {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20
+        }
+
+        /* ── SPLASH ── */
+        #splash {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse 100% 80% at 30% 60%, #0d0928 0%, #02020c 70%);
+            transition: opacity .8s
+        }
+
+        #si {
+            text-align: center;
+            max-width: 600px;
+            padding: 40px 28px
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 18px;
+            border: 1px solid rgba(124, 109, 250, .35);
+            border-radius: 100px;
+            font-size: 10px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 28px;
+            font-family: 'Syne', sans-serif;
+            background: rgba(124, 109, 250, .06)
+        }
+
+        .edot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: blink 2s infinite
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .3
+            }
+        }
+
+        #splash h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(44px, 9vw, 78px);
+            font-weight: 800;
+            line-height: .92;
+            color: #fff;
+            letter-spacing: -3px;
+            margin-bottom: 8px
+        }
+
+        #splash h1 .gr {
+            background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 45%, #38d9a9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: block
+        }
+
+        .ssub {
+            font-size: 15px;
+            color: var(--dim);
+            line-height: 1.85;
+            margin: 20px 0 36px;
+            font-weight: 300;
+            max-width: 430px;
+            margin-left: auto;
+            margin-right: auto
+        }
+
+        .pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            justify-content: center;
+            margin-bottom: 36px
+        }
+
+        .pill {
+            padding: 5px 12px;
+            border-radius: 100px;
+            font-size: 10px;
+            border: 1px solid;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-family: 'Syne', sans-serif;
+            font-weight: 600
+        }
+
+        #lbtn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 40px;
+            border-radius: 100px;
+            background: linear-gradient(135deg, #7c6dfa, #5b50e0);
+            color: #fff;
+            font-family: 'Syne', sans-serif;
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 60px rgba(124, 109, 250, .45);
+            transition: all .3s
+        }
+
+        #lbtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 80px rgba(124, 109, 250, .65)
+        }
+
+        .sfeats {
+            display: flex;
+            gap: 0;
+            margin-top: 40px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+            justify-content: center
+        }
+
+        .sfeat {
+            flex: 1;
+            text-align: center;
+            padding: 0 10px;
+            max-width: 140px
+        }
+
+        .fi {
+            font-size: 22px;
+            margin-bottom: 8px;
+            display: block
+        }
+
+        .fl {
+            font-size: 9px;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--dim);
+            margin-bottom: 4px;
+            font-family: 'Syne', sans-serif
+        }
+
+        .fv {
+            font-size: 13px;
+            color: rgba(255, 255, 255, .85);
+            font-weight: 600
+        }
+
+        /* ── HAMBURGER BUTTON ── */
+        #ham-left,
+        #ham-right {
+            display: none;
+            position: fixed;
+            z-index: 200;
+            background: var(--panel2);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            width: 38px;
+            height: 38px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-direction: column;
+            gap: 5px;
+            padding: 10px;
+            transition: all .2s;
+            top: calc(var(--th)/2 - 19px)
+        }
+
+        #ham-left {
+            left: 12px
+        }
+
+        #ham-right {
+            right: 12px
+        }
+
+        #ham-left span,
+        #ham-right span {
+            display: block;
+            width: 18px;
+            height: 2px;
+            background: var(--dim2);
+            border-radius: 2px;
+            transition: all .3s
+        }
+
+        #ham-left:hover span,
+        #ham-right:hover span {
+            background: #fff
+        }
+
+        #ham-left.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px)
+        }
+
+        #ham-left.active span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0)
+        }
+
+        #ham-left.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px)
+        }
+
+        #ham-right.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px)
+        }
+
+        #ham-right.active span:nth-child(2) {
+            opacity: 0
+        }
+
+        #ham-right.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px)
+        }
+
+        /* ── OVERLAY ── */
+        #overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            z-index: 95;
+            backdrop-filter: blur(3px)
+        }
+
+        #overlay.show {
+            display: block
+        }
+
+        /* ── SIDEBAR ── */
+        #sb {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sw);
+            background: var(--panel2);
+            border-right: 1px solid var(--border);
+            backdrop-filter: blur(32px);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateX(-100%);
+            transition: transform .4s cubic-bezier(.4, 0, .2, 1)
+        }
+
+        #sb.open {
+            transform: translateX(0)
+        }
+
+        #sblogo {
+            padding: 16px 18px 12px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0
+        }
+
+        .lm {
+            font-family: 'Syne', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -.5px
+        }
+
+        .lm em {
+            font-style: normal;
+            background: linear-gradient(135deg, #7c6dfa, #38d9a9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .ls {
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: var(--dim);
+            text-transform: uppercase;
+            margin-top: 1px
+        }
+
+        #sw {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0
+        }
+
+        #si2 {
+            width: 100%;
+            padding: 7px 11px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, .04);
+            color: #fff;
+            font-size: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+            outline: none;
+            transition: border-color .2s
+        }
+
+        #si2::placeholder {
+            color: var(--dim)
+        }
+
+        #si2:focus {
+            border-color: rgba(124, 109, 250, .5)
+        }
+
+        #sl {
+            flex: 1;
+            overflow-y: auto;
+            padding: 6px 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent
+        }
+
+        #sl::-webkit-scrollbar {
+            width: 3px
+        }
+
+        #sl::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 2px
+        }
+
+        .gl {
+            font-size: 9px;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--dim);
+            padding: 12px 18px 5px;
+            font-family: 'Syne', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 7px
+        }
+
+        .gl::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border)
+        }
+
+        .mbt {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            width: 100%;
+            padding: 7px 18px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            text-align: left;
+            transition: background .15s;
+            border-left: 2px solid transparent
+        }
+
+        .mbt:hover {
+            background: rgba(255, 255, 255, .03)
+        }
+
+        .mbt.active {
+            background: rgba(124, 109, 250, .1);
+            border-left-color: var(--accent)
+        }
+
+        .mbt.active .mbn {
+            color: #fff
+        }
+
+        .mbi {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0
+        }
+
+        .mbn {
+            font-size: 12px;
+            color: var(--dim);
+            transition: color .15s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .mbc {
+            margin-left: auto;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 100px;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            flex-shrink: 0
+        }
+
+        #sbf {
+            padding: 12px 18px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0
+        }
+
+        .hr {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 10px;
+            color: var(--dim);
+            margin-bottom: 4px
+        }
+
+        /* ── TOPBAR ── */
+        #tb {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--th);
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            z-index: 90;
+            display: none;
+            align-items: center;
+            padding: 0 14px;
+            gap: 10px
+        }
+
+        #tb.sb-open {
+            left: var(--sw)
+        }
+
+        #tbm {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        #tbi {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0
+        }
+
+        #tbc {
+            font-size: 9px;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--dim)
+        }
+
+        #tbn {
+            font-family: 'Syne', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.1
+        }
+
+        .tsp {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+            flex-shrink: 0
+        }
+
+        #tbr {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .tbb {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 11px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--dim);
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all .2s;
+            font-family: 'Syne', sans-serif;
+            font-weight: 600;
+            white-space: nowrap
+        }
+
+        .tbb:hover {
+            background: rgba(255, 255, 255, .05);
+            color: #fff;
+            border-color: rgba(255, 255, 255, .16)
+        }
+
+        .tbb.on {
+            background: rgba(124, 109, 250, .15);
+            color: var(--accent);
+            border-color: rgba(124, 109, 250, .45)
+        }
+
+        #cdot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--dim);
+            flex-shrink: 0;
+            transition: all .3s
+        }
+
+        #cdot.live {
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+            animation: pc 2s infinite
+        }
+
+        @keyframes pc {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .5
+            }
+        }
+
+        #cstat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            color: var(--dim);
+            padding: 5px 11px;
+            border-radius: 100px;
+            border: 1px solid var(--border)
+        }
+
+        /* ── INFO PANEL ── */
+        #ip {
+            position: fixed;
+            right: 0;
+            top: var(--th);
+            bottom: 0;
+            width: var(--iw);
+            background: var(--panel2);
+            border-left: 1px solid var(--border);
+            backdrop-filter: blur(32px);
+            z-index: 90;
+            display: none;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform .4s cubic-bezier(.4, 0, .2, 1)
+        }
+
+        #ip.open {
+            transform: translateX(0)
+        }
+
+        #iph {
+            padding: 14px 16px 12px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0
+        }
+
+        #ipb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px
+        }
+
+        #ipic {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0
+        }
+
+        #ipn {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.1
+        }
+
+        #ipc {
+            font-size: 9px;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            color: var(--dim);
+            margin-top: 2px
+        }
+
+        #cip {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: var(--dim);
+            cursor: pointer;
+            font-size: 15px;
+            padding: 5px 7px;
+            border-radius: 6px;
+            transition: all .2s;
+            align-self: flex-start
+        }
+
+        #cip:hover {
+            background: rgba(255, 255, 255, .06);
+            color: #fff
+        }
+
+        #ipd {
+            font-size: 12px;
+            color: var(--dim);
+            line-height: 1.8;
+            background: rgba(255, 255, 255, .025);
+            border-radius: 9px;
+            padding: 10px 12px
+        }
+
+        #isc {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent
+        }
+
+        #isc::-webkit-scrollbar {
+            width: 3px
+        }
+
+        #isc::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 2px
+        }
+
+        .pt {
+            font-size: 9px;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--dim);
+            font-family: 'Syne', sans-serif;
+            margin-bottom: 2px
+        }
+
+        .pc {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all .2s;
+            background: rgba(255, 255, 255, .015)
+        }
+
+        .pc:hover {
+            background: rgba(255, 255, 255, .045);
+            border-color: rgba(255, 255, 255, .13);
+            transform: translateX(2px)
+        }
+
+        .pc.hl {
+            border-color: var(--accent);
+            background: rgba(124, 109, 250, .08);
+            transform: translateX(3px)
+        }
+
+        .ph {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px
+        }
+
+        .pd2 {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0
+        }
+
+        .pn {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #fff;
+            font-family: 'Syne', sans-serif
+        }
+
+        .pde {
+            font-size: 11px;
+            color: var(--dim);
+            line-height: 1.65;
+            padding-left: 15px
+        }
+
+        #iss {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px;
+            padding: 0 16px 12px;
+            flex-shrink: 0;
+            border-top: 1px solid var(--border);
+            padding-top: 12px
+        }
+
+        .sb2 {
+            background: rgba(255, 255, 255, .02);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 9px 11px
+        }
+
+        .sv {
+            font-family: 'Syne', sans-serif;
+            font-size: 17px;
+            font-weight: 700;
+            color: #fff
+        }
+
+        .sl2 {
+            font-size: 10px;
+            color: var(--dim);
+            margin-top: 1px
+        }
+
+        /* ── VIDEO ── */
+        #vid {
+            position: fixed;
+            bottom: 18px;
+            right: 18px;
+            width: 100px;
+            height: 76px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            object-fit: cover;
+            transform: scaleX(-1);
+            opacity: .4;
+            z-index: 95;
+            transition: opacity .3s;
+            display: none
+        }
+
+        #vid:hover {
+            opacity: .92
+        }
+
+        /* ── CAMERA MODAL ── */
+        #cm {
+            position: fixed;
+            inset: 0;
+            z-index: 600;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2, 2, 12, .9);
+            backdrop-filter: blur(14px)
+        }
+
+        #cmb {
+            background: rgba(6, 6, 22, .99);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 380px;
+            width: 90%;
+            text-align: center
+        }
+
+        #cmb h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 19px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 8px
+        }
+
+        #cmb p {
+            font-size: 12px;
+            color: var(--dim);
+            line-height: 1.75;
+            margin-bottom: 22px
+        }
+
+        #cpw {
+            width: 100%;
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 10px
+        }
+
+        #cpb {
+            height: 100%;
+            width: 0;
+            border-radius: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transition: width .4s ease
+        }
+
+        #cst {
+            font-size: 11.5px;
+            color: var(--dim);
+            margin-bottom: 18px;
+            min-height: 18px
+        }
+
+        #ccan {
+            padding: 9px 26px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--dim);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all .2s;
+            font-family: 'Syne', sans-serif
+        }
+
+        #ccan:hover {
+            border-color: rgba(255, 255, 255, .2);
+            color: #fff
+        }
+
+        /* ── ROTATION WIDGET ── */
+        #rw {
+            position: fixed;
+            top: calc(var(--th) + 14px);
+            left: 14px;
+            display: none;
+            z-index: 85
+        }
+
+        #rw.sb-open {
+            left: calc(var(--sw) + 14px)
+        }
+
+        .rc {
+            position: relative;
+            width: 54px;
+            height: 54px
+        }
+
+        .rsv {
+            transform: rotate(-90deg)
+        }
+
+        .rtr {
+            fill: none;
+            stroke: var(--border);
+            stroke-width: 3
+        }
+
+        .rfi {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 3;
+            stroke-linecap: round;
+            transition: stroke-dashoffset .15s
+        }
+
+        .rl {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center
+        }
+
+        .rv {
+            font-family: 'Syne', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1
+        }
+
+        .rs {
+            font-size: 8px;
+            color: var(--dim);
+            letter-spacing: 1px;
+            margin-top: 1px
+        }
+
+        /* ── GESTURE BAR ── */
+        #gb {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            align-items: center;
+            gap: 6px;
+            z-index: 85
+        }
+
+        .gc {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(14px);
+            font-size: 10px;
+            color: var(--dim);
+            white-space: nowrap
+        }
+
+        .ge {
+            font-size: 13px
+        }
+
+        /* ── QUIZ PANEL ── */
+        #qp {
+            position: fixed;
+            bottom: 72px;
+            right: 18px;
+            width: 272px;
+            background: var(--panel2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            backdrop-filter: blur(20px);
+            padding: 16px;
+            z-index: 91;
+            display: none
+        }
+
+        .qh {
+            font-size: 9px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--dim);
+            margin-bottom: 10px;
+            font-family: 'Syne', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .qbdg {
+            padding: 2px 8px;
+            background: rgba(124, 109, 250, .2);
+            border-radius: 100px;
+            color: var(--accent)
+        }
+
+        .qq {
+            font-size: 13px;
+            color: #fff;
+            line-height: 1.65;
+            margin-bottom: 12px;
+            font-weight: 500
+        }
+
+        .qo {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, .02);
+            color: var(--dim);
+            font-size: 11.5px;
+            cursor: pointer;
+            text-align: left;
+            margin-bottom: 5px;
+            transition: all .18s;
+            font-family: 'Space Grotesk', sans-serif
+        }
+
+        .qo:hover {
+            border-color: rgba(124, 109, 250, .5);
+            color: #fff;
+            background: rgba(124, 109, 250, .07)
+        }
+
+        .qo:disabled {
+            pointer-events: none
+        }
+
+        .qo.ok {
+            border-color: var(--green);
+            background: rgba(56, 217, 169, .1);
+            color: var(--green)
+        }
+
+        .qo.no {
+            border-color: var(--red);
+            background: rgba(255, 107, 107, .1);
+            color: var(--red)
+        }
+
+        #qres {
+            font-size: 12px;
+            margin-top: 8px;
+            min-height: 16px;
+            text-align: center
+        }
+
+        #nq {
+            width: 100%;
+            margin-top: 8px;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(124, 109, 250, .1);
+            color: var(--accent);
+            font-size: 11.5px;
+            cursor: pointer;
+            transition: all .2s;
+            font-family: 'Syne', sans-serif;
+            font-weight: 600;
+            letter-spacing: 1px;
+            display: none
+        }
+
+        #nq:hover {
+            background: rgba(124, 109, 250, .2)
+        }
+
+        /* ── TOAST ── */
+        #toast {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%) translateY(16px);
+            background: rgba(6, 6, 22, .96);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 9px 22px;
+            font-size: 12.5px;
+            color: #fff;
+            z-index: 600;
+            opacity: 0;
+            transition: all .3s;
+            pointer-events: none;
+            backdrop-filter: blur(16px)
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0)
+        }
+
+        /* ── KEY HINTS ── */
+        #kh {
+            position: fixed;
+            top: calc(var(--th)+12px);
+            right: 16px;
+            display: none;
+            z-index: 85
+        }
+
+        .kc {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            color: var(--dim);
+            margin-bottom: 5px
+        }
+
+        kbd {
+            padding: 2px 7px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-size: 9px;
+            font-family: 'Syne', sans-serif;
+            color: rgba(255, 255, 255, .5);
+            background: rgba(255, 255, 255, .04)
+        }
+
+        /* ── MOBILE ── */
+        @media(max-width:900px) {
+            :root {
+                --sw: 100vw;
+                --iw: 100vw;
+                --th: 52px
+            }
+
+            #sb,
+            #ip {
+                width: 100vw;
+                border-radius: 0
+            }
+
+            #sb.open,
+            #ip.open {
+                z-index: 150
+            }
+
+            #ham-left,
+            #ham-right {
+                display: flex
+            }
+
+            #tb {
+                padding: 0 60px 0 60px
+            }
+
+            #tbm {
+                flex: 1;
+                min-width: 0
+            }
+
+            #tbn {
+                font-size: 12px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis
+            }
+
+            #tbc {
+                display: none
+            }
+
+            .tsp {
+                display: none
+            }
+
+            #cstat,
+            #cdot,
+            #ctxt {
+                display: none
+            }
+
+            .tbb {
+                padding: 4px 8px;
+                font-size: 9px;
+                gap: 4px
+            }
+
+            .tbb[id="btnC"] {
+                display: none
+            }
+
+            #kh {
+                display: none
+            }
+
+            #qp {
+                width: 90%;
+                right: 5%;
+                bottom: 65px
+            }
+
+            #gb {
+                bottom: 10px;
+                gap: 4px;
+                width: 95%;
+                justify-content: center;
+                flex-wrap: wrap
+            }
+
+            .gc {
+                padding: 4px 9px;
+                font-size: 9px
+            }
+
+            #rw {
+                display: none !important
+            }
+
+            .sfeats {
+                flex-wrap: wrap;
+                gap: 14px
+            }
+
+            .sfeat {
+                flex: 1 1 40%;
+                max-width: none
+            }
+
+            #tb.sb-open {
+                left: 0
+            }
+        }
+
+        @media(max-width:480px) {
+            #splash h1 {
+                font-size: clamp(34px, 14vw, 48px);
+                letter-spacing: -2px
+            }
+
+            .ssub {
+                font-size: 13px
+            }
+
+            #lbtn {
+                width: 100%;
+                justify-content: center;
+                padding: 12px
+            }
+
+            #si {
+                padding: 28px 20px
+            }
+
+            .tbb {
+                display: none
+            }
+
+            #btnL,
+            #btnQ,
+            #btnI {
+                display: flex !important
+            }
+        }
+    </style>
 </head>
+
 <body>
+    <canvas id="c"></canvas>
+    <canvas id="lc"></canvas>
+    <video id="vid" autoplay playsinline muted></video>
 
-<canvas id="c"></canvas>
-<video id="vid" autoplay playsinline muted style="display:none"></video>
-
-<div id="hud" style="display:none">
-  <div id="hud-inner">
-    <div id="shapeName">Current Form</div>
-    <div id="shapeLabel">Planet</div>
-    <div class="stat-row">
-      <div class="stat-dot" style="background:#a78bfa"></div>
-      <div class="stat-text">Openness</div>
-      <div class="stat-val" id="opennessVal">—</div>
+    <!-- SPLASH -->
+    <div id="splash">
+        <div id="si">
+            <div class="eyebrow">
+                <div class="edot"></div>Interactive 3D Science Platform
+            </div>
+            <h1>Stellar<span class="gr">Learn</span></h1>
+            <p class="ssub">Explore anatomy, space, chemistry and earth science through immersive particle 3D models
+                with labeled structures and interactive quizzes.</p>
+            <div class="pills">
+                <span class="pill"
+                    style="color:#ff6b6b;border-color:rgba(255,107,107,.25);background:rgba(255,107,107,.05)">🫀
+                    Anatomy</span>
+                <span class="pill"
+                    style="color:#60a5fa;border-color:rgba(96,165,250,.25);background:rgba(96,165,250,.05)">🌌
+                    Space</span>
+                <span class="pill"
+                    style="color:#fbbf24;border-color:rgba(251,191,36,.25);background:rgba(251,191,36,.05)">⚗️
+                    Chemistry</span>
+                <span class="pill"
+                    style="color:#38d9a9;border-color:rgba(56,217,169,.25);background:rgba(56,217,169,.05)">🧬 Cell
+                    Bio</span>
+                <span class="pill"
+                    style="color:#a78bfa;border-color:rgba(167,139,250,.25);background:rgba(167,139,250,.05)">🌍
+                    Earth</span>
+                <span class="pill"
+                    style="color:#fb923c;border-color:rgba(251,146,60,.25);background:rgba(251,146,60,.05)">⚛️
+                    Physics</span>
+            </div>
+            <button id="lbtn">Launch Environment <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg></button>
+            <div class="sfeats">
+                <div class="sfeat"><span class="fi">🧠</span>
+                    <div class="fl">Models</div>
+                    <div class="fv">16 Total</div>
+                </div>
+                <div class="sfeat"><span class="fi">🏷️</span>
+                    <div class="fl">Labels</div>
+                    <div class="fv">100+ Parts</div>
+                </div>
+                <div class="sfeat"><span class="fi">✋</span>
+                    <div class="fl">Gestures</div>
+                    <div class="fv">Hand Track</div>
+                </div>
+                <div class="sfeat"><span class="fi">📝</span>
+                    <div class="fl">Quizzes</div>
+                    <div class="fv">Built-in</div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="stat-row">
-      <div class="stat-dot" style="background:#60a5fa"></div>
-      <div class="stat-text">Zoom scale</div>
-      <div class="stat-val" id="scaleVal">1.0×</div>
+
+    <!-- CAMERA MODAL -->
+    <div id="cm">
+        <div id="cmb">
+            <div style="font-size:34px;margin-bottom:10px">✋</div>
+            <h3>Enable Hand Tracking</h3>
+            <p>Rotate the model with your hand and pinch to zoom. Camera video is processed locally — never uploaded
+                anywhere.</p>
+            <div id="cpw">
+                <div id="cpb"></div>
+            </div>
+            <div id="cst">Requesting camera access…</div>
+            <button id="ccan">Cancel</button>
+        </div>
     </div>
-    <div class="stat-row">
-      <div class="stat-dot" style="background:#34d399"></div>
-      <div class="stat-text">Hand</div>
-      <div class="stat-val" id="handVal">Tracking</div>
+
+    <!-- OVERLAY -->
+    <div id="overlay"></div>
+
+    <!-- HAMBURGER BUTTONS -->
+    <button id="ham-left" aria-label="Toggle model list"><span></span><span></span><span></span></button>
+    <button id="ham-right" aria-label="Toggle info panel"><span></span><span></span><span></span></button>
+
+    <!-- LEFT SIDEBAR -->
+    <div id="sb">
+        <div id="sblogo">
+            <div class="lm">Stellar<em>Learn</em></div>
+            <div class="ls">3D Science Environment</div>
+        </div>
+        <div id="sw"><input id="si2" type="text" placeholder="🔍  Search models…"></div>
+        <div id="sl"></div>
+        <div id="sbf">
+            <div class="hr">✋ Move hand → rotate</div>
+            <div class="hr">🤌 Pinch → zoom</div>
+            <div class="hr">← → Arrow keys → cycle</div>
+        </div>
     </div>
-    <div id="divider"></div>
-    <div id="gestureState">Initializing…</div>
-    <div id="gestureHint">Show your hand to begin</div>
-    <div id="progressBar"><div id="progressFill"></div></div>
-  </div>
-</div>
 
-<div id="legend" style="display:none">
-  <div class="legend-btn active" id="btn-planet">
-    <div class="legend-dot" style="background:#f97316"></div>
-    <span class="legend-label">Planet</span>
-  </div>
-  <div class="legend-btn" id="btn-nebula">
-    <div class="legend-dot" style="background:#a78bfa"></div>
-    <span class="legend-label">Nebula</span>
-  </div>
-  <div class="legend-btn" id="btn-galaxy">
-    <div class="legend-dot" style="background:#60a5fa"></div>
-    <span class="legend-label">Galaxy</span>
-  </div>
-</div>
-
-<div id="overlay">
-  <div id="overlay-content">
-    <div id="logo">Cosmos × Interactive</div>
-    <div id="title">Stellar<br><span>Morph</span></div>
-    <div id="subtitle">Shape the universe with your hand. Open your palm to expand a galaxy, close your fist to condense a planet.</div>
-    <button id="startBtn">
-      <span class="btn-icon"></span>
-      Initialize
-    </button>
-    <div id="gesture-guide">
-      <div class="gesture-item">
-        <span class="gesture-icon">✋</span>
-        <div class="gesture-name">Open</div>
-        <div class="gesture-desc">Galaxy form</div>
-      </div>
-      <div class="gesture-item">
-        <span class="gesture-icon">✊</span>
-        <div class="gesture-name">Closed</div>
-        <div class="gesture-desc">Planet form</div>
-      </div>
-      <div class="gesture-item">
-        <span class="gesture-icon">🤌</span>
-        <div class="gesture-name">Pinch</div>
-        <div class="gesture-desc">Zoom control</div>
-      </div>
-      <div class="gesture-item">
-        <span class="gesture-icon">👋</span>
-        <div class="gesture-name">Move</div>
-        <div class="gesture-desc">Rotate view</div>
-      </div>
+    <!-- TOPBAR -->
+    <div id="tb">
+        <div id="tbm">
+            <div id="tbi">❤️</div>
+            <div>
+                <div id="tbc">Biology</div>
+                <div id="tbn">Human Heart</div>
+            </div>
+        </div>
+        <div class="tsp"></div>
+        <div id="tbr">
+            <button class="tbb on" id="btnL">🏷️ Labels</button>
+            <button class="tbb" id="btnQ">📝 Quiz</button>
+            <button class="tbb" id="btnI">📋 Info</button>
+            <div class="tsp"></div>
+            <div id="cstat">
+                <div id="cdot"></div><span id="ctxt">No Camera</span>
+            </div>
+            <button class="tbb" id="btnC">📷 Hand</button>
+        </div>
     </div>
-  </div>
-</div>
 
-<div id="loading-bar"></div>
+    <!-- ROTATION WIDGET -->
+    <div id="rw">
+        <div class="rc">
+            <svg class="rsv" width="54" height="54" viewBox="0 0 54 54">
+                <circle class="rtr" cx="27" cy="27" r="23" />
+                <circle class="rfi" id="rfi" cx="27" cy="27" r="23" stroke-dasharray="144.5"
+                    stroke-dashoffset="144.5" />
+            </svg>
+            <div class="rl">
+                <div class="rv" id="rvl">0</div>
+                <div class="rs">OPEN</div>
+            </div>
+        </div>
+    </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script type="module">
-import { FilesetResolver, HandLandmarker } from
-  "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.mjs";
+    <!-- INFO PANEL -->
+    <div id="ip">
+        <div id="iph">
+            <div id="ipb">
+                <div id="ipic">❤️</div>
+                <div>
+                    <div id="ipn">Human Heart</div>
+                    <div id="ipc">Circulatory System · Biology</div>
+                </div>
+                <button id="cip">✕</button>
+            </div>
+            <div id="ipd"></div>
+        </div>
+        <div id="isc">
+            <div class="pt">Labeled Structures</div>
+            <div id="plist"></div>
+        </div>
+        <div id="iss">
+            <div class="sb2">
+                <div class="sv" id="stp">—</div>
+                <div class="sl2">Labeled Parts</div>
+            </div>
+            <div class="sb2">
+                <div class="sv">20K</div>
+                <div class="sl2">Particles</div>
+            </div>
+        </div>
+    </div>
 
-/* ─────────────────────────────────────────────
-   CONSTANTS & DOM
-───────────────────────────────────────────── */
-const N       = 18000;
-const canvas  = document.getElementById("c");
-const vid     = document.getElementById("vid");
-const overlay = document.getElementById("overlay");
-const hud     = document.getElementById("hud");
-const legend  = document.getElementById("legend");
-const loadingBar = document.getElementById("loading-bar");
+    <!-- QUIZ -->
+    <div id="qp">
+        <div class="qh">Quiz Mode <span class="qbdg" id="qbdg">0/0</span></div>
+        <div class="qq" id="qq">Loading…</div>
+        <div id="qopts"></div>
+        <div id="qres"></div>
+        <button id="nq">Next Question →</button>
+    </div>
 
-/* ─────────────────────────────────────────────
-   THREE.JS RENDERER
-───────────────────────────────────────────── */
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.setSize(innerWidth, innerHeight);
-renderer.setClearColor(0x000005, 1);
+    <!-- GESTURE GUIDE -->
+    <div id="gb">
+        <div class="gc"><span class="ge">✋</span>Open → expand</div>
+        <div class="gc"><span class="ge">🤌</span>Pinch → zoom</div>
+        <div class="gc"><span class="ge">👋</span>Move → rotate</div>
+    </div>
 
-const scene  = new THREE.Scene();
-scene.fog    = new THREE.FogExp2(0x000005, 0.004);
+    <!-- KEY HINTS -->
+    <div id="kh">
+        <div class="kc"><kbd>←</kbd><kbd>→</kbd> Cycle models</div>
+        <div class="kc"><kbd>L</kbd> Labels &nbsp;<kbd>Q</kbd> Quiz &nbsp;<kbd>I</kbd> Info</div>
+    </div>
 
-const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 3000);
-camera.position.set(0, 20, 80);
-camera.lookAt(0, 0, 0);
+    <div id="toast"></div>
 
-window.addEventListener("resize", () => {
-  renderer.setSize(innerWidth, innerHeight);
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
-});
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        /* ═══════════════════════════════════════════════════════
+           UTILITY FUNCTIONS
+        ═══════════════════════════════════════════════════════ */
+        function sphere(r, irreg = 0) {
+            const u = Math.random() * Math.PI * 2, v = Math.acos(2 * Math.random() - 1);
+            const n = irreg ? (Math.sin(Math.cos(u) * 5 + v * 7) * 0.5 + 0.5) * irreg : 0;
+            const rr = r * (1 + n);
+            return [Math.sin(v) * Math.cos(u) * rr, Math.cos(v) * rr, Math.sin(v) * Math.sin(u) * rr];
+        }
+        function rand() { return Math.random(); }
+        function rng2(a, b) { return a + (b - a) * Math.random(); }
 
-/* ─────────────────────────────────────────────
-   BACKGROUND STAR FIELD
-───────────────────────────────────────────── */
-const starGeo = new THREE.BufferGeometry();
-const sPos    = new Float32Array(3000 * 3);
-for (let i = 0; i < 3000; i++) {
-  const r  = 400 + Math.random() * 600;
-  const th = Math.random() * Math.PI * 2;
-  const ph = Math.acos(2 * Math.random() - 1);
-  sPos[i*3]   = r * Math.sin(ph) * Math.cos(th);
-  sPos[i*3+1] = r * Math.cos(ph);
-  sPos[i*3+2] = r * Math.sin(ph) * Math.sin(th);
-}
-starGeo.setAttribute("position", new THREE.BufferAttribute(sPos, 3));
-const starMat = new THREE.PointsMaterial({
-  color: 0xffffff, size: 0.6, sizeAttenuation: true,
-  transparent: true, opacity: 0.45
-});
-scene.add(new THREE.Points(starGeo, starMat));
+        /* ═══════════════════════════════════════════════════════
+           MODELS — ANATOMICALLY ACCURATE PARTICLE SHAPES
+        ═══════════════════════════════════════════════════════ */
+        const M = {
 
-/* ─────────────────────────────────────────────
-   MAIN PARTICLE SHADER
-───────────────────────────────────────────── */
-const vertexShader = `
-  attribute float aSize;
-  attribute vec3  aColor;
-  attribute float aPhase;
-  varying   vec3  vColor;
-  varying   float vAlpha;
-  uniform   float uTime;
+            /* ── HUMAN HEART — anatomically accurate 4-chamber shape ── */
+            heart: {
+                name: "Human Heart", cat: "Circulatory System · Biology", subj: "Biology", icon: "❤️", col: "#ff6b6b",
+                desc: "The human heart pumps ~100,000 times/day moving 5L of blood/min. It has 4 chambers: 2 atria (receiving) and 2 ventricles (pumping). The left ventricle wall is 3× thicker than the right to generate systemic pressure.",
+                parts: [
+                    { n: "Left Ventricle", c: "#ff4444", d: "Pumps oxygenated blood to the entire body via the aorta. Thick muscular walls generate ~120 mmHg systolic pressure.", p: [.55, -.4, 0] },
+                    { n: "Right Ventricle", c: "#ff8844", d: "Pumps deoxygenated blood to the lungs at lower pressure (~25 mmHg) via the pulmonary artery.", p: [-.4, -.35, 0] },
+                    { n: "Left Atrium", c: "#ff6b6b", d: "Receives oxygen-rich blood from the four pulmonary veins. Located posterior, thin-walled.", p: [.45, .55, -.3] },
+                    { n: "Right Atrium", c: "#fca5a5", d: "Receives deoxygenated blood from the body via the superior and inferior vena cava.", p: [-.45, .5, -.2] },
+                    { n: "Aorta", c: "#fbbf24", d: "Largest artery — 2.5 cm wide — carries oxygenated blood from the left ventricle to the body.", p: [.15, .85, .2] },
+                    { n: "Pulmonary Trunk", c: "#60a5fa", d: "Carries deoxygenated blood to the lungs. Only artery carrying oxygen-poor blood.", p: [-.15, .8, .3] },
+                    { n: "Superior Vena Cava", c: "#93c5fd", d: "Returns deoxygenated blood from upper body to the right atrium.", p: [-.5, .9, -.1] },
+                    { n: "Mitral Valve", c: "#a78bfa", d: "Bicuspid valve between left atrium and left ventricle. Prevents backflow during systole.", p: [.4, .12, 0] },
+                    { n: "Coronary Arteries", c: "#fcd34d", d: "Supply oxygenated blood to the heart muscle itself. Blockage causes myocardial infarction.", p: [.2, 0, .5] },
+                    { n: "Apex", c: "#dc2626", d: "Pointed lower tip of the heart formed by the left ventricle. Points left and downward.", p: [.1, -1.0, 0] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
 
-  void main() {
-    vColor = aColor;
-    float pulse = 0.85 + 0.15 * sin(uTime * 2.0 + aPhase);
-    vAlpha = pulse;
-    vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = aSize * pulse * (350.0 / -mvPos.z);
-    gl_Position  = projectionMatrix * mvPos;
-  }
-`;
+                    // ── LEFT VENTRICLE ──
+                    // Thick-walled cone: apex at bottom-left, base at top
+                    // Wall thickness ~1cm, makes up ~60% of heart mass
+                    if (f < 0.28) {
+                        const t = Math.pow(rand(), 0.55); // 0=apex, 1=base
+                        const y = -16 + t * 20;
+                        const maxR = 8 * Math.pow(t, 0.72);
+                        const innerR = maxR * 0.50, outerR = maxR;
+                        const r = innerR + (outerR - innerR) * Math.pow(rand(), 0.6);
+                        const a = rand() * Math.PI * 2;
+                        // Apex shifts left and slightly forward
+                        const apexShift = (1 - t) * 3.5;
+                        const x = 3.5 - apexShift + Math.cos(a) * r;
+                        const z = Math.sin(a) * r * 0.80;
+                        const heat = 0.78 + (1 - t) * 0.22;
+                        return { p: [x, y + (rand() - 0.5) * 0.3, z], c: [heat, 0.13 + t * 0.09, 0.10], z: 0.5 + rand() * 0.9 };
+                    }
 
-const fragmentShader = `
-  varying vec3  vColor;
-  varying float vAlpha;
+                    // ── RIGHT VENTRICLE ──
+                    // Crescent/triangle shape wrapping front of LV, thinner wall
+                    if (f < 0.50) {
+                        const t = Math.pow(rand(), 0.52);
+                        const y = -11 + t * 15;
+                        // Crescent: spans front arc ~200° around left side of LV
+                        const ang = rand() * Math.PI * 1.25 + Math.PI * 0.78;
+                        const rInner = 5.2 + t * 2.0;
+                        const rOuter = rInner + 2.0 + rand() * 1.4;
+                        const r = rInner + (rOuter - rInner) * rand();
+                        const x = 0 + Math.cos(ang) * r * 0.84;
+                        const z = 2.2 + Math.sin(ang) * r * 0.65;
+                        return { p: [x, y + (rand() - 0.5) * 0.3, z], c: [0.96, 0.50 + rand() * 0.14, 0.13], z: 0.38 + rand() * 0.78 };
+                    }
 
-  void main() {
-    vec2  uv   = gl_PointCoord - 0.5;
-    float r    = dot(uv, uv);
-    if (r > 0.25) discard;
-    float core = exp(-r * 30.0);
-    float mid  = exp(-r * 12.0) * 0.5;
-    float glow = exp(-r *  4.0) * 0.15;
-    float a    = (core + mid + glow) * vAlpha;
-    gl_FragColor = vec4(vColor * (core + mid + glow) * 1.2, a);
-  }
-`;
+                    // ── LEFT ATRIUM ──
+                    // Posterior, sits behind and above LV, receives 4 pulmonary veins
+                    if (f < 0.61) {
+                        const frac = (f - 0.50) / 0.11;
+                        if (frac < 0.80) {
+                            const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1);
+                            const bump = Math.sin(u * 3) * 0.35;
+                            const r = 4.5 + bump;
+                            const x = 5.2 + Math.sin(v) * Math.cos(u) * r * 0.94;
+                            const y = 5.2 + Math.cos(v) * r * 0.80;
+                            const z = -4.2 + Math.sin(v) * Math.sin(u) * r * 0.76;
+                            return { p: [x, y, z], c: [1, 0.38, 0.36], z: 0.4 + rand() * 0.7 };
+                        }
+                        // 4 pulmonary vein stubs entering posterior LA
+                        const vI = Math.floor(rand() * 4);
+                        const vOff = [[2.5, 0.8], [2.5, -0.8], [-1.5, 0.8], [-1.5, -0.8]][vI];
+                        const vT = rand();
+                        return { p: [5.2 + vOff[0] + vT * 3.5, 5.5 + vOff[1] * 0.5, -5.5 - vT * 3.5], c: [0.36, 0.63, 0.97], z: 0.45 + rand() * 0.65 };
+                    }
 
-/* ─────────────────────────────────────────────
-   PARTICLE GEOMETRY
-───────────────────────────────────────────── */
-const geo       = new THREE.BufferGeometry();
-const positions = new Float32Array(N * 3);
-const colors    = new Float32Array(N * 3);
-const sizes     = new Float32Array(N);
-const phases    = new Float32Array(N);
+                    // ── RIGHT ATRIUM ──
+                    // Right side, anterior-lateral, receives SVC + IVC
+                    // Larger than LA, more anterior position
+                    if (f < 0.73) {
+                        const frac = (f - 0.61) / 0.12;
+                        if (frac < 0.78) {
+                            const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1);
+                            const bump = Math.sin(u * 2) * 0.38;
+                            const r = 4.8 + bump;
+                            const x = -5.8 + Math.sin(v) * Math.cos(u) * r * 0.95;
+                            const y = 4.2 + Math.cos(v) * r * 0.82;
+                            const z = -1.2 + Math.sin(v) * Math.sin(u) * r * 0.74;
+                            return { p: [x, y, z], c: [0.99, 0.68, 0.68], z: 0.36 + rand() * 0.64 };
+                        }
+                        // Right auricle (ear-shaped appendage pointing left/forward)
+                        const a = rand() * Math.PI * 2, r = 2.2 + rand() * 1.5;
+                        return { p: [-8.8 + Math.cos(a) * r * 0.72, 6.8 + Math.sin(a) * r * 0.60, 1.8 + (rand() - 0.5) * 1.2], c: [0.98, 0.62, 0.62], z: 0.33 + rand() * 0.58 };
+                    }
 
-for (let i = 0; i < N; i++) {
-  const r  = 100 + Math.random() * 80;
-  const th = Math.random() * Math.PI * 2;
-  const ph = Math.acos(2 * Math.random() - 1);
-  positions[i*3]   = r * Math.sin(ph) * Math.cos(th);
-  positions[i*3+1] = r * Math.cos(ph);
-  positions[i*3+2] = r * Math.sin(ph) * Math.sin(th);
-  sizes[i]    = 0.4 + Math.random() * 1.8;
-  phases[i]   = Math.random() * Math.PI * 2;
-  colors[i*3] = colors[i*3+1] = colors[i*3+2] = 1;
-}
+                    // ── AORTA — ascending + arch ──
+                    // Exits LV upward, then arches LEFT over pulmonary trunk
+                    // Brachiocephalic, left carotid, left subclavian branch off arch
+                    if (f < 0.81) {
+                        const frac = (f - 0.73) / 0.08;
+                        if (frac < 0.55) {
+                            // Ascending aorta — goes straight up from LV outlet
+                            const t = frac / 0.55;
+                            const y = 4 + t * 9;
+                            const x = 4.5 + Math.sin(t * 0.6) * 1.5 + (rand() - 0.5) * 1.0;
+                            const z = 1.8 + (rand() - 0.5) * 1.2;
+                            return { p: [x, y, z], c: [0.92, 0.22, 0.18], z: 0.55 + rand() * 0.88 };
+                        }
+                        // Aortic arch — curves left over pulmonary trunk
+                        const t = (frac - 0.55) / 0.45;
+                        const archAngle = t * Math.PI * 0.88 + 0.1;
+                        const archCX = 3.5, archCY = 13.5, archR = 5;
+                        const x = archCX + Math.cos(archAngle) * archR + (rand() - 0.5) * 0.9;
+                        const y = archCY - Math.sin(archAngle) * archR * 0.82 + (rand() - 0.5) * 0.7;
+                        const z = 1.5 + Math.sin(archAngle * 0.9) * 2.5 + (rand() - 0.5) * 1.1;
+                        return { p: [x, y, z], c: [0.88, 0.20, 0.16], z: 0.55 + rand() * 0.9 };
+                    }
 
-geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-geo.setAttribute("aColor",   new THREE.BufferAttribute(colors,    3));
-geo.setAttribute("aSize",    new THREE.BufferAttribute(sizes,     1));
-geo.setAttribute("aPhase",   new THREE.BufferAttribute(phases,    1));
+                    // ── PULMONARY TRUNK ──
+                    // Exits RV, goes up and LEFT in front of aorta, then splits
+                    if (f < 0.87) {
+                        const t = (f - 0.81) / 0.06;
+                        const x = -0.8 - t * 2.2 + (rand() - 0.5) * 1.0;
+                        const y = 2.5 + t * 7.5 + (rand() - 0.5) * 0.7;
+                        const z = 3.5 + t * 2.5 + (rand() - 0.5) * 1.2; // in FRONT of aorta
+                        return { p: [x, y, z], c: [0.36, 0.63, 0.97], z: 0.52 + rand() * 0.82 };
+                    }
 
-const mat = new THREE.ShaderMaterial({
-  vertexShader, fragmentShader,
-  uniforms: { uTime: { value: 0 } },
-  transparent: true,
-  depthWrite: false,
-  blending: THREE.AdditiveBlending,
-});
+                    // ── SUPERIOR VENA CAVA ──
+                    // Descends from upper right into right atrium
+                    if (f < 0.92) {
+                        const t = (f - 0.87) / 0.05;
+                        const x = -6.5 + (rand() - 0.5) * 1.4;
+                        const y = 5.2 + t * 7.5 + (rand() - 0.5) * 0.8;
+                        const z = -0.8 + (rand() - 0.5) * 1.6;
+                        return { p: [x, y, z], c: [0.56, 0.78, 0.98], z: 0.40 + rand() * 0.68 };
+                    }
 
-const points = new THREE.Points(geo, mat);
-scene.add(points);
+                    // ── CORONARY ARTERIES + INTERVENTRICULAR SEPTUM surface ──
+                    // Left anterior descending runs down front groove between ventricles
+                    const coronaryType = rand();
+                    if (coronaryType > 0.55) {
+                        // LAD — left anterior descending, runs along front of septum
+                        const t = rand();
+                        const x = 1.5 - t * 1.2 + (rand() - 0.5) * 0.8;
+                        const y = -2 - t * 13 + (rand() - 0.5) * 0.5;
+                        const z = 3.8 + (rand() - 0.5) * 0.9; // front surface
+                        return { p: [x, y, z], c: [1, 0.83, 0.20], z: 0.35 + rand() * 0.58 };
+                    }
+                    // Right coronary artery — runs in right atrioventricular groove
+                    const a = rand() * Math.PI * 2, r = 7.5 + Math.sin(a * 4) * 0.6;
+                    const y2 = -1 + rand() * 10 - 5;
+                    return { p: [Math.cos(a) * r * 0.85, y2, Math.sin(a) * r * 0.60 + 0.5], c: [1, 0.83, 0.20], z: 0.28 + rand() * 0.48 };
+                }
+            },
 
-/* ─────────────────────────────────────────────
-   SHAPE GENERATORS
-───────────────────────────────────────────── */
-function generatePlanet(i) {
-  const isRing = i % 4 !== 0;
-  if (isRing) {
-    const a    = Math.random() * Math.PI * 2;
-    const band = Math.floor(Math.random() * 3);
-    const radii = [[20, 28], [30, 36], [38, 44]];
-    const [rMin, rMax] = radii[band];
-    const rad  = rMin + Math.random() * (rMax - rMin);
-    const tilt = (Math.random() - 0.5) * 0.25 + (Math.random() - 0.5) * 0.08;
-    const cols = [[0.4, 0.7, 1.0], [0.8, 0.6, 1.0], [1.0, 0.85, 0.5]];
-    const [cr, cg, cb] = cols[band];
-    const bright = 0.7 + Math.random() * 0.3;
-    return {
-      pos: [Math.cos(a) * rad, tilt, Math.sin(a) * rad],
-      col: [cr * bright, cg * bright, cb * bright],
-      sz:  0.3 + Math.random() * 0.9
-    };
-  } else {
-    const u     = Math.random(), v = Math.random();
-    const theta = u * Math.PI * 2;
-    const phi   = Math.acos(2 * v - 1);
-    const rad   = 14 * Math.cbrt(Math.random() * 0.8 + 0.2);
-    const t     = rad / 14;
-    let cr, cg, cb;
-    if (t < 0.4)      { cr = 0.7 + t; cg = 0.8 + t * 0.4; cb = 1.0; }
-    else if (t < 0.7) { cr = 1.0;     cg = 0.5 + t * 0.3;  cb = 0.3 - t * 0.2; }
-    else              { cr = 1.0;     cg = 0.35 - t * 0.1;  cb = 0.1; }
-    return {
-      pos: [
-        rad * Math.sin(phi) * Math.cos(theta),
-        rad * Math.cos(phi),
-        rad * Math.sin(phi) * Math.sin(theta)
-      ],
-      col: [cr, cg, cb],
-      sz:  0.5 + Math.random() * 1.2
-    };
-  }
-}
+            /* ── BRAIN — realistic cerebral cortex with lobes ── */
+            brain: {
+                name: "Human Brain", cat: "Nervous System · Biology", subj: "Biology", icon: "🧠", col: "#fb923c",
+                desc: "The brain has ~86 billion neurons forming ~100 trillion connections. It consumes 20% of body energy despite being only 2% of body weight. Cortical folds (gyri and sulci) increase surface area 3-fold.",
+                parts: [
+                    { n: "Frontal Lobe", c: "#fb923c", d: "Controls executive function, decision-making, voluntary movement (motor cortex), and Broca's area for speech production.", p: [0, .5, .8] },
+                    { n: "Parietal Lobe", c: "#fbbf24", d: "Integrates sensory input — touch, pain, temperature, spatial awareness. Contains the somatosensory cortex.", p: [0, .8, -.1] },
+                    { n: "Temporal Lobe", c: "#f87171", d: "Processes auditory input, language comprehension (Wernicke's area), and memory consolidation.", p: [.9, .05, .1] },
+                    { n: "Occipital Lobe", c: "#a78bfa", d: "Primary visual cortex — processes shape, color, and motion. Located at the posterior pole.", p: [0, .25, -.95] },
+                    { n: "Cerebellum", c: "#60a5fa", d: "Coordinates movement and balance. Contains 80% of all brain neurons despite being only 10% of brain volume.", p: [0, -.55, -.7] },
+                    { n: "Brain Stem", c: "#34d399", d: "Controls respiration, heart rate, blood pressure, sleep cycles. Connects brain to spinal cord.", p: [0, -.75, -.15] },
+                    { n: "Corpus Callosum", c: "#f9a8d4", d: "250 million myelinated axons connecting left and right hemispheres.", p: [0, .2, 0] },
+                    { n: "Hippocampus", c: "#6ee7b7", d: "Sea-horse shaped structure critical for memory formation and spatial navigation.", p: [.5, -.1, -.1] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
+                    if (f < 0.70) {
+                        const u = rand() * Math.PI * 2, v = rand() * Math.PI;
+                        const baseR = 15;
+                        // Gyral folds — multi-frequency noise simulating cortical convolutions
+                        const fold =
+                            Math.sin(u * 5.2) * Math.cos(v * 3.8) * 1.3 +
+                            Math.sin(u * 9.7 + 0.5) * Math.cos(v * 6.1) * 0.7 +
+                            Math.sin(u * 15.3 + 1.2) * Math.cos(v * 9.4) * 0.35 +
+                            Math.sin(u * 22 + v) * 0.18;
+                        const r = baseR + fold + (rand() - 0.5) * 0.25;
+                        const sx = Math.sin(v) * Math.cos(u), sy = Math.cos(v), sz = Math.sin(v) * Math.sin(u);
+                        // Realistic shape: wider temporal, narrower frontal pole, flattened inferior
+                        const shapeX = 1.0 + Math.sin(v) * 0.06, shapeY = 0.82 - Math.cos(v) * 0.04, shapeZ = 0.88;
+                        const x = sx * r * shapeX;
+                        const y = sy * r * shapeY + 2;
+                        const z = sz * r * shapeZ;
+                        // Interhemispheric fissure — exclude particles near midline at top
+                        if (Math.abs(x) < 0.9 && y > 2) return { p: [x, y, z], c: [0.08, 0.07, 0.12], z: 0.05 };
+                        // Lobe coloring based on anatomical position
+                        const isFrontal = z > 4.5 && y > -5;
+                        const isParietal = y > 7 && z < 5 && z > -5;
+                        const isOccipital = z < -12;
+                        const isTemporal = Math.abs(x) > 13.5 && y < 4;
+                        const isInsular = Math.abs(x) > 10 && y < 0 && z > -5 && z < 6;
+                        let c;
+                        if (isFrontal) c = [0.97, 0.53, 0.16];
+                        else if (isOccipital) c = [0.63, 0.5, 0.96];
+                        else if (isTemporal) c = [0.96, 0.4, 0.4];
+                        else if (isParietal) c = [1, 0.73, 0.18];
+                        else if (isInsular) c = [0.35, 0.78, 0.55];
+                        else c = [0.94, 0.47, 0.2];
+                        return { p: [x, y, z], c: c.map(v => v * (0.72 + rand() * 0.28)), z: 0.35 + rand() * 0.78 };
+                    }
+                    if (f < 0.85) {
+                        // Cerebellum — tight horizontal folia
+                        const u = rand() * Math.PI * 2;
+                        const folia = Math.sin(u * 16) * 1.2;
+                        const r = 6.5 + folia + rand() * 0.3;
+                        const yB = -9.5 - rand() * 3.5;
+                        const zB = -12 - rand() * 4.5;
+                        return { p: [Math.cos(u) * r * 0.9, yB, zB + Math.sin(u) * r * 0.52], c: [0.36, 0.62, 0.97], z: 0.35 + rand() * 0.65 };
+                    }
+                    if (f < 0.93) {
+                        // Brain stem — tapered cylinder with bulge for pons
+                        const h = -11 - rand() * 10;
+                        const pons = h > -16 && h < -13 ? 1.4 : 1.0;
+                        const a = rand() * Math.PI * 2, r = (2.6 + rand() * 0.5) * pons;
+                        return { p: [Math.cos(a) * r * 0.62, h, Math.sin(a) * r * 0.62 - 2.8], c: [0.2, 0.85, 0.58], z: 0.4 + rand() * 0.65 };
+                    }
+                    // Corpus callosum — curved beam connecting hemispheres
+                    const t = rand() * Math.PI;
+                    const ccX = Math.cos(t) * 4.2 * (rand() - 0.5) * 2;
+                    const ccY = Math.abs(Math.sin(t)) * 3.5 + 1;
+                    return { p: [ccX, ccY, (rand() - 0.5) * 2.5], c: [0.97, 0.62, 0.82], z: 0.3 + rand() * 0.5 };
+                }
+            },
 
-function generateNebula(i) {
-  const arm      = i % 5;
-  const armAngle = (arm / 5) * Math.PI * 2;
-  const dist     = 5 + Math.pow(Math.random(), 1.5) * 40;
-  const twist    = dist * 0.08;
-  const a        = armAngle + twist + (Math.random() - 0.5) * 0.6;
-  const spread   = 8 + dist * 0.35;
-  const x  = Math.cos(a) * dist + (Math.random() - 0.5) * spread;
-  const y  = (Math.random() - 0.5) * (spread * 0.4) + (Math.random() - 0.5) * 4;
-  const z  = Math.sin(a) * dist + (Math.random() - 0.5) * spread;
-  const t  = dist / 40;
-  let cr, cg, cb;
-  const type = arm % 3;
-  if      (type === 0) { cr = 0.9 - t * 0.3; cg = 0.2 + t * 0.5; cb = 0.7 + t * 0.2; }
-  else if (type === 1) { cr = 0.6 + t * 0.2; cg = 0.1;            cb = 1.0 - t * 0.3; }
-  else                 { cr = 0.2;            cg = 0.6 + t * 0.3;  cb = 0.9 - t * 0.2; }
-  const bright = 0.6 + Math.random() * 0.4;
-  return {
-    pos: [x, y, z],
-    col: [cr * bright, cg * bright, cb * bright],
-    sz:  0.4 + Math.random() * 2.0
-  };
-}
+            /* ── LUNGS — realistic asymmetric lobes ── */
+            lung: {
+                name: "Human Lungs", cat: "Respiratory System · Biology", subj: "Biology", icon: "🫁", col: "#60a5fa",
+                desc: "The lungs contain ~300 million alveoli with a total surface area of ~70m². They process 11,000L of air daily. The right lung has 3 lobes; the left has 2 to accommodate the heart.",
+                parts: [
+                    { n: "Right Upper Lobe", c: "#60a5fa", d: "Superior lobe of right lung. Separated from middle by horizontal fissure.", p: [1.0, .75, 0] },
+                    { n: "Right Middle Lobe", c: "#7dd3fc", d: "Smallest of the three right lobes. Separated from lower by oblique fissure.", p: [1.0, -.05, 0] },
+                    { n: "Right Lower Lobe", c: "#93c5fd", d: "Largest lobe of the right lung, extending to the diaphragm.", p: [.85, -.85, 0] },
+                    { n: "Left Upper Lobe", c: "#4a90d9", d: "Larger left lobe with the cardiac notch — indentation for the heart.", p: [-1.0, .55, 0] },
+                    { n: "Left Lower Lobe", c: "#6ba6e8", d: "Posterior lower lobe in contact with diaphragm and heart.", p: [-.95, -.75, 0] },
+                    { n: "Trachea", c: "#fbbf24", d: "The windpipe — 10–12 cm with C-shaped cartilage rings.", p: [0, 1.05, 0] },
+                    { n: "Carina & Bronchi", c: "#fb923c", d: "The carina splits the trachea at T4-T5 into left and right primary bronchi.", p: [0, .35, 0] },
+                    { n: "Alveolar Clusters", c: "#a78bfa", d: "Microscopic air sacs where O₂/CO₂ gas exchange occurs across walls just 0.2μm thick.", p: [.8, -.45, .3] },
+                    { n: "Pulmonary Hilum", c: "#f87171", d: "Gateway for bronchi, pulmonary vessels, and lymphatics entering each lung.", p: [.15, .05, 0] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
+                    // RIGHT LUNG 3 lobes — right is taller, more vertical, no cardiac notch
+                    const rightLobe = (lobe, frac) => {
+                        const lobes = [
+                            { yC: 9, halfH: 8, R: 6.8, Rz: 5.2, xC: 9.5 },   // upper
+                            { yC: 1, halfH: 6, R: 6.2, Rz: 4.8, xC: 10 },     // middle
+                            { yC: -9, halfH: 9, R: 7.2, Rz: 5.5, xC: 9.2 },   // lower
+                        ];
+                        const L = lobes[lobe];
+                        const a = rand() * Math.PI * 2, yT = (rand() - 0.5);
+                        const r = L.R * (0.82 + rand() * 0.2);
+                        // Medial surface flat — costal surface convex
+                        const medialFlat = Math.cos(a) < 0.3 ? 0.7 + Math.cos(a) * 0.35 : 1.0;
+                        const x = L.xC + Math.cos(a) * r * 0.88 * medialFlat;
+                        const y = L.yC + yT * L.halfH;
+                        const z = Math.sin(a) * r * 0.58 + Math.cos(yT * 1.4) * 1.5;
+                        return { x, y, z };
+                    };
+                    const leftLobe = (lobe, frac) => {
+                        const lobes = [
+                            { yC: 6.5, halfH: 9.5, R: 6.4, xC: -9.2 },  // upper (larger)
+                            { yC: -7.5, halfH: 8.5, R: 6.9, xC: -9 },   // lower
+                        ];
+                        const L = lobes[lobe];
+                        const a = rand() * Math.PI * 2, yT = (rand() - 0.5);
+                        const r = L.R * (0.82 + rand() * 0.2);
+                        const x = L.xC + Math.cos(a) * r * 0.88;
+                        const y = L.yC + yT * L.halfH;
+                        const z = Math.sin(a) * r * 0.56 + Math.cos(yT * 1.3) * 1.2;
+                        // Cardiac notch — cut out medial inferior left upper lobe
+                        if (lobe === 0 && x > -5.5 && y > -3 && y < 5) return null;
+                        return { x, y, z };
+                    };
+                    if (f < 0.16) {
+                        const d = rightLobe(0, f / 0.16);
+                        return { p: [d.x, d.y, d.z], c: [0.36, 0.61, 0.97].map(v => v * (0.78 + rand() * 0.22)), z: 0.35 + rand() * 0.8 };
+                    }
+                    if (f < 0.30) {
+                        const d = rightLobe(1, (f - 0.16) / 0.14);
+                        return { p: [d.x, d.y, d.z], c: [0.48, 0.76, 0.99].map(v => v * (0.78 + rand() * 0.22)), z: 0.35 + rand() * 0.8 };
+                    }
+                    if (f < 0.46) {
+                        const d = rightLobe(2, (f - 0.30) / 0.16);
+                        return { p: [d.x, d.y, d.z], c: [0.58, 0.76, 0.99].map(v => v * (0.78 + rand() * 0.22)), z: 0.35 + rand() * 0.8 };
+                    }
+                    if (f < 0.64) {
+                        const d = leftLobe(0, (f - 0.46) / 0.18);
+                        if (!d) return { p: [-7, 5, 0], c: [0.3, 0.52, 0.88], z: 0.3 };
+                        return { p: [d.x, d.y, d.z], c: [0.28, 0.5, 0.88].map(v => v * (0.78 + rand() * 0.22)), z: 0.35 + rand() * 0.8 };
+                    }
+                    if (f < 0.80) {
+                        const d = leftLobe(1, (f - 0.64) / 0.16);
+                        if (!d) return { p: [-7, -7, 0], c: [0.38, 0.58, 0.9], z: 0.3 };
+                        return { p: [d.x, d.y, d.z], c: [0.38, 0.58, 0.9].map(v => v * (0.78 + rand() * 0.22)), z: 0.35 + rand() * 0.8 };
+                    }
+                    if (f < 0.88) {
+                        // Trachea — C-ring ridged tube
+                        const h = 8.5 + rand() * 10, a = rand() * Math.PI * 2, ring = Math.sin(h * 2.2) * 0.3;
+                        const r = 2.1 + ring + rand() * 0.3;
+                        return { p: [Math.cos(a) * r, h, Math.sin(a) * r * 0.55], c: [1, 0.76, 0.2], z: 0.5 + rand() };
+                    }
+                    if (f < 0.95) {
+                        // Bronchial tree — fractal branching
+                        const side = rand() > 0.5 ? 1 : -1, depth = rand();
+                        const a = rand() * Math.PI * 2, r = 1.4 - depth * 0.7;
+                        const x = side * (2.5 + depth * 5.5), y = 0 - depth * 5.5;
+                        return { p: [x + Math.cos(a) * r, y + (rand() - 0.5) * 1.3, Math.sin(a) * r * 0.55], c: [0.97, 0.55, 0.16], z: 0.4 + rand() * 0.7 };
+                    }
+                    // Alveolar sacs
+                    const s = rand() > 0.5 ? 9.5 : -8, y = rand() * 14 - 7, r = 1.8 + rand() * 2.8, a2 = rand() * Math.PI * 2;
+                    return { p: [s + Math.cos(a2) * r * 0.7, y + Math.sin(a2) * r * 0.7, (rand() - 0.5) * 4], c: [0.65, 0.43, 0.97], z: 0.4 + rand() * 0.9 };
+                }
+            },
 
-function generateGalaxy(i) {
-  const arms   = 5;
-  const maxR   = 48;
-  const rad    = Math.pow(Math.random(), 1.8) * maxR;
-  const armIdx = i % arms;
-  const angle  = rad * 0.18 + (armIdx / arms) * Math.PI * 2;
-  const disp   = (Math.random() - 0.5);
-  const dScale = (maxR - rad) * 0.1;
-  const x  = Math.cos(angle) * rad + disp * dScale * 12;
-  const y  = (rad < 10 ? 5 : 0.8) * (Math.random() - 0.5) + (Math.random() - 0.5) * 1.5;
-  const z  = Math.sin(angle) * rad + disp * dScale * 12;
-  const t  = rad / maxR;
-  let cr, cg, cb;
-  if      (t < 0.15) { cr = 1.0;          cg = 0.95;          cb = 1.0; }
-  else if (t < 0.5)  { cr = 0.4 + t;      cg = 0.5 + t * 0.3; cb = 1.0; }
-  else               { cr = 0.9 + t * 0.1; cg = 0.65 - t * 0.2; cb = 0.3 - t * 0.15; }
-  const bright = Math.max(0, (1 - t * 0.4)) * (0.7 + Math.random() * 0.3);
-  return {
-    pos: [x, y, z],
-    col: [cr * bright, cg * bright, cb * bright],
-    sz:  0.3 + Math.random() * 1.5
-  };
-}
+            /* ── EYE — realistic globe cross-section ── */
+            eye: {
+                name: "Human Eye", cat: "Sensory System · Biology", subj: "Biology", icon: "👁️", col: "#38d9a9",
+                desc: "The eye can distinguish ~10 million colors and detect a single photon in darkness. Its 130 million photoreceptors (120M rods, 10M cones) process images in 13 milliseconds.",
+                parts: [
+                    { n: "Cornea", c: "#7dd3fc", d: "Transparent avascular dome providing 70% of refractive power. Five layers thick. Gets oxygen directly from air.", p: [0, 0, 1.1] },
+                    { n: "Iris & Pupil", c: "#38d9a9", d: "Muscular ring controlling pupil aperture from 2–8mm. Color determined by melanin in stroma.", p: [0, 0, .92] },
+                    { n: "Crystalline Lens", c: "#fbbf24", d: "Flexible biconvex lens that changes shape (accommodation) to focus at different distances.", p: [0, 0, .52] },
+                    { n: "Vitreous Chamber", c: "#93c5fd", d: "99% water gel filling the posterior segment, maintaining spherical shape and optical clarity.", p: [0, 0, -.1] },
+                    { n: "Retina", c: "#f87171", d: "Multi-layered neural tissue with 130M photoreceptors converting light to electrical signals.", p: [0, 0, -.85] },
+                    { n: "Fovea Centralis", c: "#fcd34d", d: "Central 1.5mm pit with only cone photoreceptors — responsible for sharp color vision.", p: [0, -.1, -.9] },
+                    { n: "Optic Nerve", c: "#a78bfa", d: "1.2 million nerve fibers transmitting signals to the visual cortex.", p: [0, -.2, -.95] },
+                    { n: "Choroid", c: "#ef4444", d: "Vascular layer between retina and sclera supplying oxygen and nutrients.", p: [0, .4, -.55] },
+                    { n: "Sclera", c: "#f5f5f5", d: "The white of the eye — tough outer fibrous coat. Six extraocular muscles attach here.", p: [0, .88, 0] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
+                    // Sclera — posterior 5/6 of globe, off-white fibrous shell
+                    if (f < 0.20) {
+                        const u = rand() * Math.PI * 2, v = rand() * Math.PI * 0.82 + 0.1;
+                        const r = 15.5 + (rand() - 0.5) * 0.22;
+                        const x = Math.sin(v) * Math.cos(u) * r, y = Math.sin(v) * Math.sin(u) * r * 1.04, z = Math.cos(v) * r;
+                        return { p: [x, y * 0.96, z < 2 ? z * 0.9 : z], c: [0.97, 0.96, 0.94], z: 0.18 + rand() * 0.3 };
+                    }
+                    // Choroid — dark red vascular layer
+                    if (f < 0.38) {
+                        const u = rand() * Math.PI * 2, v = rand() * Math.PI * 0.72 + 0.15;
+                        const r = 14.0 + (rand() - 0.5) * 0.25;
+                        return { p: [Math.sin(v) * Math.cos(u) * r, Math.sin(v) * Math.sin(u) * r * 1.02, Math.cos(v) * r], c: [0.86, 0.18 + rand() * 0.1, 0.18], z: 0.3 + rand() * 0.5 };
+                    }
+                    // Retina — photoreceptor layer, highlight fovea and optic disc
+                    if (f < 0.57) {
+                        const u = rand() * Math.PI * 2, v = rand() * Math.PI * 0.65 + 0.18;
+                        const r = 12.7 + (rand() - 0.5) * 0.2;
+                        const x = Math.sin(v) * Math.cos(u) * r, y = Math.sin(v) * Math.sin(u) * r, z = Math.cos(v) * r;
+                        const isFovea = Math.abs(x) < 1.6 && Math.abs(y - 1) < 1.6 && z < -11.8;
+                        const isDisc = Math.abs(x - 2.5) < 1.5 && Math.abs(y + 1.5) < 1.5 && z < -11;
+                        let c = isFovea ? [1, 0.84, 0.18] : isDisc ? [0.98, 0.98, 0.92] : [0.96, 0.4, 0.4];
+                        return { p: [x, y, z], c, z: isFovea ? 1.1 : isDisc ? 0.8 : 0.35 + rand() * 0.6 };
+                    }
+                    // Cornea — clear flatter anterior dome (less curved than sclera, K=43D)
+                    if (f < 0.68) {
+                        const u = rand() * Math.PI * 2, v = rand() * Math.PI * 0.22;
+                        const r = 15.9 + (rand() - 0.5) * 0.28;
+                        return { p: [Math.sin(v) * Math.cos(u) * r, Math.sin(v) * Math.sin(u) * r, Math.cos(v) * r], c: [0.45, 0.82, 0.99], z: 0.28 + rand() * 0.52 };
+                    }
+                    // Crystalline lens — biconvex, 10mm diameter, 4mm thick
+                    if (f < 0.78) {
+                        const u = rand() * Math.PI * 2, rMax = 3.5, r = rMax * Math.pow(rand(), 0.45);
+                        const y = (rand() - 0.5);
+                        const convex = Math.sqrt(Math.max(0, 1 - (r / rMax) ** 2));
+                        return { p: [Math.cos(u) * r * 0.94, y * 3.2, 7 + Math.sin(u) * r * 0.9 * convex], c: [1, 0.8, 0.22], z: 0.5 + rand() * 0.8 };
+                    }
+                    // Iris — colored fibrous ring with radial texture
+                    if (f < 0.88) {
+                        const u = rand() * Math.PI * 2;
+                        const radialNoise = Math.sin(u * 24) * 0.3;
+                        const r = 2.8 + rand() * 4.6 + radialNoise;
+                        return { p: [Math.cos(u) * r, Math.sin(u) * r, 13.3 + (rand() - 0.5) * 0.35], c: [0.2, 0.76, 0.62], z: 0.5 + rand() * 0.7 };
+                    }
+                    // Vitreous + Optic nerve
+                    if (f < 0.94) {
+                        const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1), r = 2 + rand() * 9;
+                        return { p: [Math.sin(v) * Math.cos(u) * r, Math.sin(v) * Math.sin(u) * r, Math.cos(v) * r - 3], c: [0.58, 0.76, 0.99], z: 0.08 + rand() * 0.15 };
+                    }
+                    const a = rand() * Math.PI * 2, r = 3.2 + rand(), h = -15 - rand() * 9;
+                    return { p: [Math.cos(a) * r * 0.6 + 1, Math.sin(a) * r * 0.6 - 2.2, h], c: [0.65, 0.43, 0.97], z: 0.4 + rand() * 0.6 };
+                }
+            },
 
-const SHAPES      = [generatePlanet, generateNebula, generateGalaxy];
-const SHAPE_NAMES = ["Planet", "Nebula", "Galaxy"];
-const SHAPE_COLS  = ["#f97316", "#a78bfa", "#60a5fa"];
+            /* ── DNA DOUBLE HELIX ── */
+            dna: {
+                name: "DNA Double Helix", cat: "Molecular Biology · Biology", subj: "Biology", icon: "🧬", col: "#a78bfa",
+                desc: "DNA encodes life using 4 bases (A,T,G,C). The human genome has ~3 billion base pairs. The double helix was discovered by Watson & Crick in 1953. Each full turn spans 10 base pairs (3.4nm).",
+                parts: [
+                    { n: "5'→3' Backbone", c: "#60a5fa", d: "Two twisted strands of alternating deoxyribose and phosphate groups run antiparallel.", p: [.6, .5, 0] },
+                    { n: "3'→5' Backbone", c: "#4ade80", d: "The complementary strand running antiparallel. Anti-parallel orientation is essential for replication.", p: [-.6, .5, 0] },
+                    { n: "Adenine–Thymine Pair", c: "#f87171", d: "A-T pairs connected by 2 hydrogen bonds. Weaker than G-C pairs.", p: [.3, .1, 0] },
+                    { n: "Guanine–Cytosine Pair", c: "#34d399", d: "G-C pairs connected by 3 hydrogen bonds — more stable, higher melting temperature.", p: [-.3, -.1, 0] },
+                    { n: "Hydrogen Bonds", c: "#e9d5ff", d: "Weak non-covalent forces holding the two strands together and allowing unzipping.", p: [0, 0, 0] },
+                    { n: "Major Groove", c: "#7dd3fc", d: "Wider groove accessible to proteins. DNA-binding proteins read genetic sequences here.", p: [.5, -.25, 0] },
+                    { n: "Minor Groove", c: "#fbbf24", d: "Narrower groove (~1.2nm). Some drugs and proteins bind here to affect gene expression.", p: [-.5, -.4, 0] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
+                    const turns = 10, H = 58, R = 8;
+                    const t = f * Math.PI * 2 * turns - Math.PI * turns;
+                    const y = t / (Math.PI * 2 * turns) * H - H / 2;
+                    // Strand 1 — 5'→3' (sugar-phosphate backbone)
+                    if (f < 0.28) {
+                        const jit = (rand() - 0.5) * 0.9;
+                        const r = R + Math.sin(t * 2) * 0.3; // minor groove effect
+                        return { p: [Math.cos(t) * r + jit, y + (rand() - 0.5) * 0.22, Math.sin(t) * r + jit], c: [0.36, 0.63, 0.97], z: 0.5 + rand() * 0.85 };
+                    }
+                    // Strand 2 — 3'→5' antiparallel
+                    if (f < 0.56) {
+                        const t2 = t + Math.PI, jit = (rand() - 0.5) * 0.9;
+                        const r = R + Math.sin(t2 * 2) * 0.3;
+                        return { p: [Math.cos(t2) * r + jit, y + (rand() - 0.5) * 0.22, Math.sin(t2) * r + jit], c: [0.25, 0.78, 0.48], z: 0.5 + rand() * 0.85 };
+                    }
+                    // Base pairs — correctly spaced at 0.34nm (3.4 scale units per pair, 10 per turn)
+                    const bpTotal = Math.round(turns * 10);
+                    const bpIdx = Math.floor(rand() * bpTotal);
+                    const bpAngle = (bpIdx / bpTotal) * Math.PI * 2 * turns - Math.PI * turns;
+                    const bpY = (bpAngle / (Math.PI * 2 * turns)) * H - H / 2;
+                    const side = rand();
+                    const x1 = Math.cos(bpAngle) * R, z1 = Math.sin(bpAngle) * R;
+                    const x2 = Math.cos(bpAngle + Math.PI) * R, z2 = Math.sin(bpAngle + Math.PI) * R;
+                    const px = x1 + (x2 - x1) * side, pz = z1 + (z2 - z1) * side;
+                    // Base type determined by position (A-T or G-C alternating in realistic pattern)
+                    const isGC = (bpIdx % 3) === 0; // ~33% GC
+                    const isHbond = side > 0.38 && side < 0.62;
+                    const purBaseCols = [[0.97, 0.4, 0.4], [0.38, 0.75, 0.4]];  // A red, G green
+                    const pyrBaseCols = [[0.98, 0.78, 0.2], [0.38, 0.65, 0.97]]; // T yellow, C blue
+                    const baseCol = side < 0.5
+                        ? (isGC ? purBaseCols[1] : purBaseCols[0])
+                        : (isGC ? pyrBaseCols[1] : pyrBaseCols[0]);
+                    return { p: [px + (rand() - 0.5) * 0.3, bpY + (rand() - 0.5) * 0.22, pz + (rand() - 0.5) * 0.3], c: isHbond ? [0.91, 0.82, 1] : baseCol, z: 0.45 + rand() * 0.75 };
+                }
+            },
 
-/* ─────────────────────────────────────────────
-   MORPH STATE
-───────────────────────────────────────────── */
-let currentShape    = 0;
-let targetPositions = new Float32Array(N * 3);
-let targetColors    = new Float32Array(N * 3);
-let targetSizes     = new Float32Array(N);
-let lerpT           = 1.0;
-let scale = 1, targetScale = 1;
-let rotX = 0, rotY = 0, targetRotX = 0, targetRotY = 0;
-let clock           = 0;
-let prevOpenness    = 0;
+            /* ── ANIMAL CELL ── */
+            cell: {
+                name: "Animal Cell", cat: "Cell Biology · Biology", subj: "Biology", icon: "🔬", col: "#fbbf24",
+                desc: "The animal cell is the basic unit of life — 10–100μm across. It contains ~1.5 billion protein molecules and executes thousands of chemical reactions per second.",
+                parts: [
+                    { n: "Cell Membrane", c: "#60a5fa", d: "Phospholipid bilayer (~7.5nm thick) with embedded proteins. Selectively permeable.", p: [0, 0, 1.1] },
+                    { n: "Nucleus", c: "#a78bfa", d: "Control center enclosed in a double nuclear envelope with nuclear pores. Contains chromosomal DNA.", p: [-.3, .2, 0] },
+                    { n: "Nucleolus", c: "#e9d5ff", d: "Dense region where ribosomal RNA is synthesized and ribosomes are assembled.", p: [-.3, .25, .05] },
+                    { n: "Mitochondria", c: "#fb923c", d: "ATP-producing organelles with cristae. Have their own circular DNA — endosymbiotic origin.", p: [.7, .2, 0] },
+                    { n: "Rough ER", c: "#f87171", d: "Endoplasmic reticulum studded with ribosomes. Produces secretory and membrane proteins.", p: [-.5, -.3, 0] },
+                    { n: "Golgi Apparatus", c: "#34d399", d: "Stack of flattened cisternae that modifies, sorts, and packages proteins into vesicles.", p: [.4, .5, 0] },
+                    { n: "Lysosomes", c: "#f9a8d4", d: "Membrane-bound organelles with 50+ digestive enzymes at pH 4.5.", p: [.5, -.4, 0] },
+                    { n: "Ribosomes", c: "#fcd34d", d: "Molecular machines 25nm across. Translate mRNA to proteins.", p: [-.1, -.1, .3] },
+                    { n: "Cytoskeleton", c: "#6ee7b7", d: "Network of actin filaments and microtubules giving the cell shape and enabling movement.", p: [.6, -.1, .3] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
+                    if (f < 0.11) {
+                        const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1);
+                        const bump = Math.sin(u * 6) * Math.cos(v * 4) * 0.7 + Math.sin(u * 11) * Math.sin(v * 7) * 0.3;
+                        const r = 18 + bump + (rand() - 0.5) * 0.4;
+                        return { p: [Math.sin(v) * Math.cos(u) * r * 0.95, Math.cos(v) * r * 0.92, Math.sin(v) * Math.sin(u) * r * 0.95], c: [.38, .65, .98], z: .22 + rand() * .4 };
+                    }
+                    if (f < 0.26) {
+                        const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1);
+                        const r = 6.5 + Math.sin(u * 4) * Math.cos(v * 3) * 0.3 + (rand() - 0.5) * 0.25;
+                        return { p: [-4 + Math.sin(v) * Math.cos(u) * r, 4 + Math.cos(v) * r * 0.9, Math.sin(v) * Math.sin(u) * r * 0.9], c: [.67, .55, .98], z: .4 + rand() * .7 };
+                    }
+                    if (f < 0.32) {
+                        const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1), r = 2.4 + rand() * 0.5;
+                        return { p: [-4.5 + Math.sin(v) * Math.cos(u) * r, 4.5 + Math.cos(v) * r, Math.sin(v) * Math.sin(u) * r], c: [.92, .83, 1], z: .6 + rand() * .8 };
+                    }
+                    if (f < 0.46) {
+                        const count = 6, mt = Math.floor(rand() * count);
+                        const mOff = [[8, 3, 0], [10, -2, 3], [7, -5, -2], [9, 1, -4], [6, 4, 3], [11, -1, 0]][mt];
+                        const len = 4 + rand() * 2.5, r = 1.4 + rand() * 0.5;
+                        const a = rand() * Math.PI * 2, h = (rand() - 0.5) * len;
+                        return { p: [mOff[0] + Math.cos(a) * r, mOff[1] + h, mOff[2] + Math.sin(a) * r * 0.7], c: [.98, .57, .19], z: .4 + rand() * .8 };
+                    }
+                    if (f < 0.56) {
+                        const seg = Math.floor(rand() * 5), t = rand() * Math.PI * 2, h = rand() * 3 - 1.5;
+                        const cx = [-6, -8, -5, -7, -6][seg], cy = [-4, -2, -6, -5, -3][seg];
+                        return { p: [cx + Math.cos(t) * (3 + rand()), cy + h, Math.sin(t) * (3 + rand()) * 0.4], c: [.97, .45, .45], z: .3 + rand() * .6 };
+                    }
+                    if (f < 0.64) {
+                        const disc = Math.floor(rand() * 6), discY = 5.5 + disc * 0.9;
+                        const a = rand() * Math.PI * 2, r = 3.5 - disc * 0.2;
+                        return { p: [4 + Math.cos(a) * r, discY, (rand() - 0.5) * 0.4 + Math.sin(a) * r * 0.25], c: [.2, .85, .6], z: .4 + rand() * .7 };
+                    }
+                    if (f < 0.72) {
+                        const ls = Math.floor(rand() * 5), lx = [7, 8, 6, 9, 7][ls], ly = [-5, -3, -7, -4, -6][ls];
+                        const r = 1.2 + rand() * 0.6, u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1);
+                        return { p: [lx + Math.sin(v) * Math.cos(u) * r, ly + Math.cos(v) * r, Math.sin(v) * Math.sin(u) * r], c: [.98, .64, .83], z: .4 + rand() * .7 };
+                    }
+                    if (f < 0.82) {
+                        const t = rand() * Math.PI * 2;
+                        return { p: [Math.cos(t) * 11 + rand() * 3 - 1.5, Math.sin(t) * 9 + (rand() - 0.5) * 3, (rand() - 0.5) * 5], c: [.43, .91, .69], z: .15 + rand() * .3 };
+                    }
+                    return { p: [(rand() - 0.5) * 26, (rand() - 0.5) * 24, (rand() - 0.5) * 12], c: [1, .83, .25], z: .2 + rand() * .35 };
+                }
+            },
 
-function buildTargets(idx) {
-  for (let i = 0; i < N; i++) {
-    const d = SHAPES[idx](i);
-    targetPositions[i*3]   = d.pos[0];
-    targetPositions[i*3+1] = d.pos[1];
-    targetPositions[i*3+2] = d.pos[2];
-    targetColors[i*3]      = d.col[0];
-    targetColors[i*3+1]    = d.col[1];
-    targetColors[i*3+2]    = d.col[2];
-    targetSizes[i]         = d.sz || 1;
-  }
-}
-buildTargets(0);
-// Seed initial positions
-for (let i = 0; i < N * 3; i++) {
-  positions[i] = targetPositions[i];
-  colors[i]    = targetColors[i];
-}
+            /* ── NEURON ── */
+            neuron: {
+                name: "Motor Neuron", cat: "Nervous System · Biology", subj: "Biology", icon: "⚡", col: "#60a5fa",
+                desc: "Motor neurons transmit signals from the spinal cord to muscles. They have the longest cells in the body — a single axon can be over 1 meter long. Signal travels at up to 120 m/s.",
+                parts: [
+                    { n: "Cell Body (Soma)", c: "#a78bfa", d: "Contains the nucleus, mitochondria, and Nissl bodies. Integrates incoming signals.", p: [0, 0, 0] },
+                    { n: "Nucleus", c: "#e9d5ff", d: "Large prominent nucleus with a visible nucleolus. Motor neurons have especially large nuclei.", p: [0, .05, .05] },
+                    { n: "Dendrites", c: "#60a5fa", d: "Multiple branching processes receiving input from thousands of synapses.", p: [.8, .5, 0] },
+                    { n: "Axon Hillock", c: "#fbbf24", d: "Cone-shaped junction where axon meets soma. Fires action potentials when threshold is reached.", p: [0, -.35, 0] },
+                    { n: "Axon", c: "#38d9a9", d: "Single long process conducting action potentials. Can extend 1 meter in motor neurons.", p: [0, -1.1, 0] },
+                    { n: "Myelin Sheath", c: "#f9a8d4", d: "Fatty insulation from Schwann cells. Increases conduction velocity 50-100× by saltatory conduction.", p: [.3, -.8, 0] },
+                    { n: "Nodes of Ranvier", c: "#fbbf24", d: "Gaps in myelin where voltage-gated ion channels concentrate. Signal 'jumps' between nodes.", p: [.2, -1.0, 0] },
+                    { n: "Axon Terminals", c: "#fb923c", d: "Synaptic boutons releasing neurotransmitters into the synaptic cleft.", p: [0, -1.4, 0] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
+                    if (f < 0.18) {
+                        const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1);
+                        const bump = Math.sin(u * 5) * Math.cos(v * 4) * 0.8;
+                        const r = 8 + bump + (rand() - 0.5) * 0.5;
+                        return { p: [Math.sin(v) * Math.cos(u) * r, Math.cos(v) * r * 0.9 + 2, Math.sin(v) * Math.sin(u) * r * 0.85], c: [.67, .45, .98], z: .4 + rand() * .7 };
+                    }
+                    if (f < 0.25) {
+                        const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1), r = 3.5 + rand() * 0.4;
+                        return { p: [Math.sin(v) * Math.cos(u) * r, 2 + Math.cos(v) * r, Math.sin(v) * Math.sin(u) * r * 0.9], c: [.92, .83, 1], z: .5 + rand() * .8 };
+                    }
+                    if (f < 0.48) {
+                        const branch = Math.floor(rand() * 7);
+                        const angles = [0, .9, 1.8, 2.7, 3.6, 4.5, 5.4][branch];
+                        const depth = Math.pow(rand(), .7), spread = depth * 12;
+                        const a = angles + (rand() - 0.5) * 0.4, r = 8 + spread;
+                        const bx = Math.cos(a) * r * 0.85, by = 2 + Math.sin(a) * r * 0.85 + (rand() - 0.5) * spread * 0.3;
+                        return { p: [bx + (rand() - 0.5) * 2, by, (rand() - 0.5) * 3], c: [.38, .65, .98], z: .35 + rand() * .65 };
+                    }
+                    if (f < 0.68) {
+                        const h = -8 - rand() * 42, a = rand() * Math.PI * 2, r = 1.2 + rand() * 0.4;
+                        const segLen = 5, isNode = Math.abs(h % segLen) < 0.5;
+                        return { p: [Math.cos(a) * r * 0.8, h, Math.sin(a) * r * 0.8], c: isNode ? [1, .82, .25] : [.22, .85, .67], z: .4 + rand() * .7 };
+                    }
+                    if (f < 0.82) {
+                        const segI = Math.floor(rand() * 8), segY = -10 - segI * 5.5;
+                        const u = rand() * Math.PI * 2, r = 2.8 + rand() * 0.4, h = rand() * 4;
+                        return { p: [Math.cos(u) * r, segY + h, Math.sin(u) * r * 0.7], c: [.98, .64, .83], z: .3 + rand() * .5 };
+                    }
+                    const terminal = Math.floor(rand() * 5), tx = (terminal - 2) * 4;
+                    const u = rand() * Math.PI * 2, r = 2 + rand() * 1.5;
+                    return { p: [tx + Math.cos(u) * r, -54 + Math.sin(u) * r * 0.8, (rand() - 0.5) * 3], c: [.98, .57, .19], z: .5 + rand() * .9 };
+                }
+            },
 
-function setShape(idx) {
-  if (idx === currentShape) return;
-  currentShape = idx;
-  buildTargets(idx);
-  lerpT = 0;
-  document.getElementById("shapeLabel").textContent = SHAPE_NAMES[idx];
-  const btns = ["btn-planet", "btn-nebula", "btn-galaxy"];
-  btns.forEach((id, i) => document.getElementById(id).classList.toggle("active", i === idx));
-  document.getElementById("progressFill").style.background = SHAPE_COLS[idx];
-  document.getElementById("gestureState").style.color      = SHAPE_COLS[idx];
-}
+            /* ── KIDNEY ── */
+            kidney: {
+                name: "Human Kidney", cat: "Excretory System · Biology", subj: "Biology", icon: "🫘", col: "#fb923c",
+                desc: "Each kidney filters ~180L of blood daily, producing 1–2L of urine. Contains ~1 million nephrons — the functional filtering units. Kidneys regulate blood pressure, pH, and electrolyte balance.",
+                parts: [
+                    { n: "Renal Cortex", c: "#fb923c", d: "Outer layer housing glomeruli and convoluted tubules. Site of filtration and reabsorption.", p: [0, .8, 0] },
+                    { n: "Renal Medulla", c: "#f87171", d: "Inner region of renal pyramids. Loop of Henle and collecting ducts concentrate urine here.", p: [0, 0, 0] },
+                    { n: "Renal Pelvis", c: "#fbbf24", d: "Funnel-shaped cavity collecting urine from major calyces before passing to the ureter.", p: [0, -.5, 0] },
+                    { n: "Glomerulus", c: "#a78bfa", d: "Capillary knot inside Bowman's capsule. Filters ~180L/day via ultrafiltration.", p: [.5, .7, 0] },
+                    { n: "Renal Artery", c: "#ef4444", d: "Branch of aorta delivering oxygenated blood. Receives 20–25% of total cardiac output.", p: [-.7, .2, 0] },
+                    { n: "Renal Vein", c: "#60a5fa", d: "Returns filtered blood to the inferior vena cava.", p: [.7, .1, 0] },
+                    { n: "Ureter", c: "#fcd34d", d: "25–30cm muscular tube carrying urine by peristalsis to the urinary bladder.", p: [0, -.9, 0] },
+                    { n: "Collecting Duct", c: "#34d399", d: "Receives filtrate from multiple nephrons. Final water reabsorption regulated by ADH.", p: [-.3, -.3, 0] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
+                    // Precise kidney bean profile using medial concavity equation
+                    const beanProfile = (a) => {
+                        // Medial indentation centered at a=0 (right side)
+                        const indentStrength = Math.max(0, Math.cos(a));
+                        return 11.5 * (1 - indentStrength * 0.30);
+                    };
+                    // Renal cortex — outer 1cm layer, granular (glomeruli + tubules)
+                    if (f < 0.28) {
+                        const a = rand() * Math.PI * 2, h = (rand() - 0.5) * 22;
+                        const Rout = beanProfile(a);
+                        const Rin = Rout * 0.82;
+                        const r = Rin + (Rout - Rin) * rand();
+                        const x = Math.cos(a) * r, z = Math.sin(a) * r * 0.60;
+                        return { p: [x, h, z], c: [0.97, 0.55 + rand() * 0.1, 0.18], z: 0.35 + rand() * 0.7 };
+                    }
+                    // Renal medulla — 8 pyramids pointing inward toward pelvis
+                    if (f < 0.64) {
+                        const pyrIdx = Math.floor(rand() * 8);
+                        const pyrAngle = (pyrIdx / 8) * Math.PI * 2;
+                        const Rout = beanProfile(pyrAngle);
+                        const h = (rand() - 0.5) * 18;
+                        const t = rand(); // 0=papilla tip (inner), 1=base (outer)
+                        const r = Rout * 0.15 + (Rout * 0.82 - Rout * 0.15) * t; // pyramid from pelvis to cortex
+                        const spread = Math.PI / 10 * (1 - t) * 0.9; // narrows to papilla
+                        const a = pyrAngle + (rand() - 0.5) * spread * 2;
+                        const x = Math.cos(a) * r, z = Math.sin(a) * r * 0.58;
+                        // Collecting ducts visible in pyramids
+                        const isDuct = rand() > 0.78;
+                        return { p: [x, h * (0.5 + t * 0.6), z], c: isDuct ? [0.2, 0.84, 0.58] : [0.97, 0.36 + rand() * 0.2, 0.16], z: 0.4 + rand() * 0.72 };
+                    }
+                    // Renal pelvis — funnel, calyces
+                    if (f < 0.78) {
+                        const calyx = Math.floor(rand() * 4), cA = (calyx / 4) * Math.PI * 2 + 0.3;
+                        const r = 1.8 + rand() * 2.2, a2 = rand() * Math.PI * 2, h = (rand() - 0.5) * 7;
+                        const cx = Math.cos(cA) * 4.5, cz = Math.sin(cA) * 2.8;
+                        return { p: [cx + Math.cos(a2) * r * 0.55, h, cz + Math.sin(a2) * r * 0.42], c: [1, 0.76, 0.18], z: 0.5 + rand() * 0.82 };
+                    }
+                    // Renal artery and vein entering at hilum
+                    if (f < 0.90) {
+                        const side = rand() > 0.5 ? 1 : -1, h = (rand() - 0.5) * 10;
+                        const t = rand(), a = rand() * Math.PI * 2, r = 1.5 + rand() * 0.6;
+                        const x = side > 0 ? -(10 - t * 8) : -(10 - t * 8); // both enter medially
+                        return { p: [Math.cos(a) * r * 0.4 + x, h, Math.sin(a) * r * 0.3], c: side > 0 ? [0.22, 0.5, 0.99] : [0.96, 0.24, 0.24], z: 0.4 + rand() * 0.7 };
+                    }
+                    // Ureter exiting inferior pole
+                    const h = -11.5 - rand() * 9, a = rand() * Math.PI * 2, r = 1.7 + rand() * 0.4;
+                    return { p: [Math.cos(a) * r * 0.38, h, Math.sin(a) * r * 0.28], c: [1, 0.84, 0.22], z: 0.45 + rand() * 0.6 };
+                }
+            },
 
-function easeInOut(t) {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
+            /* ── SOLAR SYSTEM ── */
+            solarsystem: {
+                name: "Solar System", cat: "Astronomy · Space Science", subj: "Space", icon: "☀️", col: "#fbbf24",
+                desc: "Our Solar System formed 4.6 billion years ago. The Sun holds 99.86% of total mass. Light takes 8.3 minutes from Sun to Earth. Neptune is 30× farther from the Sun than Earth.",
+                parts: [
+                    { n: "The Sun", c: "#fbbf24", d: "G-type main-sequence star, 1.39M km diameter, 15M°C core. Nuclear fusion of hydrogen to helium.", p: [0, 0, 0] },
+                    { n: "Mercury", c: "#9ca3af", d: "Closest planet, 0.39 AU. No atmosphere — temperatures swing -180°C to +430°C.", p: [.5, 0, 0] },
+                    { n: "Venus", c: "#fb923c", d: "Hottest planet (462°C). Thick CO₂ atmosphere. Retrograde rotation.", p: [.75, 0, 0] },
+                    { n: "Earth", c: "#38d9a9", d: "Third planet, 1 AU. Only confirmed life-bearing world. Liquid water, magnetic field.", p: [1.0, 0, 0] },
+                    { n: "Mars", c: "#f87171", d: "4th planet, 1.52 AU. Home to Olympus Mons (21km). Ancient liquid water.", p: [1.3, 0, 0] },
+                    { n: "Jupiter", c: "#fb923c", d: "Largest planet — 318 Earth masses. Great Red Spot storm >350 years old. 95 moons.", p: [1.95, 0, 0] },
+                    { n: "Saturn & Rings", c: "#fbbf24", d: "Ring system spans 282,000km, ~1km thick. 83 moons including Titan.", p: [2.4, 0, 0] },
+                    { n: "Uranus", c: "#7dd3fc", d: "Ice giant tilted 98°. 27 moons named after Shakespeare characters.", p: [2.8, 0, 0] },
+                    { n: "Neptune", c: "#3b82f6", d: "Strongest winds (2,100 km/h). Triton orbits retrograde.", p: [3.2, 0, 0] },
+                    { n: "Asteroid Belt", c: "#9ca3af", d: "Region 2.2–3.2 AU between Mars and Jupiter. Contains Ceres.", p: [1.6, 0, 0] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
+                    // Orbital radii (scaled log for visibility), real inclinations
+                    const planets = [
+                        { name: 'mercury', orb: 20, size: 1.4, col: [0.62, 0.63, 0.67], inc: 0.12, ecc: 0.21 },
+                        { name: 'venus', orb: 30, size: 2.2, col: [0.97, 0.57, 0.22], inc: 0.06, ecc: 0.01 },
+                        { name: 'earth', orb: 42, size: 2.5, col: [0.22, 0.72, 0.88], inc: 0.0, ecc: 0.02 },
+                        { name: 'mars', orb: 55, size: 1.8, col: [0.88, 0.38, 0.28], inc: 0.03, ecc: 0.09 },
+                        { name: 'jupiter', orb: 82, size: 9.5, col: [0.97, 0.62, 0.28], inc: 0.02, ecc: 0.05 },
+                        { name: 'saturn', orb: 106, size: 7.8, col: [0.99, 0.82, 0.48], inc: 0.04, ecc: 0.06 },
+                        { name: 'uranus', orb: 130, size: 5.0, col: [0.48, 0.82, 0.97], inc: 0.01, ecc: 0.05 },
+                        { name: 'neptune', orb: 155, size: 4.8, col: [0.22, 0.48, 0.97], inc: 0.03, ecc: 0.01 },
+                    ];
+                    // Sun — limb darkening, convective granulation
+                    if (f < 0.25) {
+                        const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1);
+                        const flare = Math.sin(u * 9 + v * 7) * 0.9 + Math.sin(u * 15) * 0.4;
+                        const r = 13.5 + Math.max(0, flare) * Math.pow(rand(), 2.5) * 3 + (rand() - 0.5) * 0.4;
+                        const limbD = 1 - (r - 13.5) / 4 * 0.3; // limb darkening
+                        const gran = Math.sin(u * 22) * Math.cos(v * 18) * 0.08;
+                        return { p: [Math.sin(v) * Math.cos(u) * r, Math.cos(v) * r * 0.97, Math.sin(v) * Math.sin(u) * r], c: [1, (0.7 + gran + limbD * 0.2) * 0.92, (0.08 + gran) * 0.8], z: 0.5 + rand() * 1.5 };
+                    }
+                    // Orbital paths — elliptical with inclination
+                    if (f < 0.46) {
+                        const pIdx = Math.floor(rand() * 8), pl = planets[pIdx];
+                        const a = rand() * Math.PI * 2;
+                        const r = pl.orb * (1 - pl.ecc * pl.ecc) / (1 + pl.ecc * Math.cos(a));
+                        const x = Math.cos(a) * r, z = Math.sin(a) * r;
+                        const y = Math.sin(a) * r * Math.sin(pl.inc);
+                        return { p: [x, y, z], c: pl.col.map(v => v * 0.28), z: 0.08 + rand() * 0.2 };
+                    }
+                    // Planet bodies at a fixed orbital position (a=0.82 rad)
+                    if (f < 0.68) {
+                        const pIdx = Math.floor(rand() * 8), pl = planets[pIdx];
+                        const a = 0.82;
+                        const r = pl.orb * (1 - pl.ecc * pl.ecc) / (1 + pl.ecc * Math.cos(a));
+                        const cx = Math.cos(a) * r, cz = Math.sin(a) * r;
+                        const cy = Math.sin(a) * r * Math.sin(pl.inc);
+                        // Saturn rings
+                        if (pIdx === 5 && rand() > 0.42) {
+                            const rA = rand() * Math.PI * 2;
+                            const rr = pl.size * 2.2 + rand() * pl.size * 1.9;
+                            return { p: [cx + Math.cos(rA) * rr, cy + (rand() - 0.5) * 0.25, cz + Math.sin(rA) * rr], c: [1, 0.92, 0.68], z: 0.2 + rand() * 0.38 };
+                        }
+                        // Jupiter bands
+                        if (pIdx === 4) {
+                            const u2 = rand() * Math.PI * 2, v2 = Math.acos(2 * rand() - 1);
+                            const pr = pl.size * (0.88 + rand() * 0.18);
+                            const band = Math.floor((v2 / Math.PI) * 6);
+                            const bandC = band % 2 === 0 ? [0.97, 0.62, 0.28] : [0.82, 0.52, 0.22];
+                            return { p: [cx + Math.sin(v2) * Math.cos(u2) * pr, cy + Math.cos(v2) * pr * 0.96, cz + Math.sin(v2) * Math.sin(u2) * pr], c: bandC, z: 0.3 + rand() };
+                        }
+                        // Earth cloud bands
+                        if (pIdx === 2) {
+                            const u2 = rand() * Math.PI * 2, v2 = Math.acos(2 * rand() - 1);
+                            const pr = pl.size * (0.88 + rand() * 0.18);
+                            const isOcean = Math.sin(u2 * 3) * Math.cos(v2 * 2) > -0.1;
+                            return { p: [cx + Math.sin(v2) * Math.cos(u2) * pr, cy + Math.cos(v2) * pr, cz + Math.sin(v2) * Math.sin(u2) * pr], c: isOcean ? [0.22, 0.72, 0.88] : [0.22, 0.55, 0.28], z: 0.3 + rand() };
+                        }
+                        const u2 = rand() * Math.PI * 2, v2 = Math.acos(2 * rand() - 1);
+                        const pr = pl.size * (0.86 + rand() * 0.2);
+                        return { p: [cx + Math.sin(v2) * Math.cos(u2) * pr, cy + Math.cos(v2) * pr, cz + Math.sin(v2) * Math.sin(u2) * pr], c: pl.col, z: 0.3 + rand() };
+                    }
+                    // Asteroid belt — elliptical ring between Mars and Jupiter
+                    if (f < 0.80) {
+                        const a = rand() * Math.PI * 2, r = 63 + rand() * 14, y = (rand() - 0.5) * 3;
+                        const size = rand() > 0.96 ? 1.5 + rand() : 0.3 + rand() * 0.5; // Ceres-like large ones
+                        return { p: [Math.cos(a) * r, y, Math.sin(a) * r], c: [0.5, 0.47, 0.43], z: 0.1 + rand() * 0.35 };
+                    }
+                    // Stars
+                    const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1), sr = 480 + rand() * 220;
+                    const starType = rand(); // color by spectral class
+                    const starC = starType > 0.85 ? [0.7, 0.8, 1] : starType > 0.6 ? [1, 1, 1] : starType > 0.3 ? [1, 0.96, 0.82] : [1, 0.7, 0.4];
+                    return { p: [Math.sin(v) * Math.cos(u) * sr, Math.cos(v) * sr * 0.5, Math.sin(v) * Math.sin(u) * sr], c: starC, z: 0.05 + rand() * 0.22 };
+                }
+            },
 
-/* ─────────────────────────────────────────────
-   ANIMATION LOOP
-───────────────────────────────────────────── */
-function animate() {
-  requestAnimationFrame(animate);
-  clock += 0.004;
-  mat.uniforms.uTime.value = clock * 4;
+            /* ── BLACK HOLE ── */
+            blackhole: {
+                name: "Black Hole", cat: "Astrophysics · Space Science", subj: "Space", icon: "🕳️", col: "#a78bfa",
+                desc: "Black holes form from collapsing massive stars. The Event Horizon Telescope imaged M87* in 2019 — 6.5 billion solar masses, 55 million light-years away.",
+                parts: [
+                    { n: "Singularity", c: "#e9d5ff", d: "Point of infinite density where general relativity breaks down.", p: [0, 0, 0] },
+                    { n: "Event Horizon", c: "#4c1d95", d: "Schwarzschild radius — where escape velocity equals c. Nothing escapes.", p: [0, 0, .1] },
+                    { n: "Photon Sphere", c: "#fbbf24", d: "At 1.5× Schwarzschild radius — photons orbit unstably. Creates glowing ring.", p: [0, 0, .2] },
+                    { n: "Accretion Disk", c: "#fb923c", d: "Superheated gas spiraling inward, millions of degrees. Emits X-rays.", p: [0, 0, 0] },
+                    { n: "Relativistic Jets", c: "#60a5fa", d: "Plasma beams ejected at ~99.9% light speed along the rotation axis.", p: [0, .5, 0] },
+                    { n: "Gravitational Lensing", c: "#a78bfa", d: "Extreme gravity bends light paths, creating Einstein rings of background objects.", p: [.5, 0, .2] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
+                    // Singularity + event horizon — absolute black
+                    if (f < 0.03) {
+                        const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1), r = 5.5 * Math.pow(rand(), 0.45);
+                        return { p: [Math.sin(v) * Math.cos(u) * r, Math.cos(v) * r * 0.52, Math.sin(v) * Math.sin(u) * r], c: [0.02, 0.02, 0.05], z: 0.15 + rand() };
+                    }
+                    // Accretion disk — temperature gradient (inner hot blue-white, outer cooler red)
+                    if (f < 0.52) {
+                        const a = rand() * Math.PI * 2, rMin = 7.5, rMax = 50;
+                        const r = rMin + Math.pow(rand(), 1.5) * (rMax - rMin);
+                        // Disk warp / precession effect
+                        const warp = Math.sin(a * 2) * 0.8;
+                        const diskH = (rand() - 0.5) * Math.max(0.15, (r - rMin) / (rMax - rMin)) * 3.5 + warp * 0.3;
+                        const heat = Math.pow(1 - (r - rMin) / (rMax - rMin), 1.8); // T ∝ r^(-3/4)
+                        // Relativistic beaming — approaching side brighter (left, cos(a)>0)
+                        const beam = Math.cos(a) > 0 ? 1.45 : 0.6;
+                        const innerC = [Math.min(1, heat * 0.5 + 0.5) * beam, Math.min(1, heat * 0.25 + 0.12) * beam, Math.min(1, heat * 0.9 + 0.1) * beam]; // hot = blue-white
+                        const outerC = [Math.min(1, (1 - heat) * 0.9 + 0.1) * beam, Math.min(1, heat * 0.3) * beam, 0.04 * beam]; // cool = red-orange
+                        const t = (r - rMin) / (rMax - rMin);
+                        const c = innerC.map((v, i2) => v * (1 - t) + outerC[i2] * t);
+                        return { p: [Math.cos(a) * r, diskH, Math.sin(a) * r], c: c.map(v => Math.min(1, Math.max(0, v))), z: 0.2 + rand() * 0.85 };
+                    }
+                    // Relativistic jets — collimated plasma (boosted by Lorentz factor)
+                    if (f < 0.66) {
+                        const dir = i % 2 ? 1 : -1;
+                        const h = 9 + Math.pow(rand(), 1.2) * 60 * dir;
+                        const lorentz = Math.exp(-Math.abs(h) * 0.025); // jet collimates with distance
+                        const spread = Math.abs(h) * 0.06 * (1 - lorentz * 0.5) + rand() * 1.2;
+                        const a = rand() * Math.PI * 2;
+                        return { p: [spread * Math.cos(a), h, spread * Math.sin(a)], c: [0.35 + lorentz * 0.3, 0.62 + lorentz * 0.2, 0.97], z: 0.18 + rand() * 0.72 };
+                    }
+                    // Photon sphere — unstable circular photon orbits at 1.5× Schwarzschild radius
+                    if (f < 0.76) {
+                        const a = rand() * Math.PI * 2, r = 10.5 + rand() * 0.55, y = (rand() - 0.5) * 0.6;
+                        return { p: [Math.cos(a) * r, y, Math.sin(a) * r], c: [1, 0.92, 0.28], z: 0.35 + rand() * 0.72 };
+                    }
+                    // Gravitational lensing arcs — Einstein ring fragments
+                    if (f < 0.88) {
+                        const arc = Math.floor(rand() * 5), arcA = (arc / 5) * Math.PI * 2;
+                        const a = arcA + (rand() - 0.5) * 0.45, r = 58 + rand() * 18, y = (rand() - 0.5) * 6;
+                        return { p: [Math.cos(a) * r, y, Math.sin(a) * r], c: [0.65, 0.42, 0.97], z: 0.14 + rand() * 0.4 };
+                    }
+                    // Background stars
+                    const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1), sr = 420 + rand() * 220;
+                    return { p: [Math.sin(v) * Math.cos(u) * sr, Math.cos(v) * sr, Math.sin(v) * Math.sin(u) * sr], c: [1, 1, 1], z: 0.08 + rand() * 0.22 };
+                }
+            },
 
-  // Smooth camera rotation
-  rotX += (targetRotX - rotX) * 0.04;
-  rotY += (targetRotY - rotY) * 0.04;
-  points.rotation.x = rotX + Math.sin(clock) * 0.06;
-  points.rotation.y = rotY + clock * 0.25;
+            /* ── GALAXY ── */
+            galaxy: {
+                name: "Milky Way Galaxy", cat: "Galactic Astronomy · Space Science", subj: "Space", icon: "🌌", col: "#60a5fa",
+                desc: "The Milky Way has 100–400 billion stars spanning ~100,000 light-years. Our Solar System is 26,000 light-years from center. One galactic orbit takes 225 million years.",
+                parts: [
+                    { n: "Galactic Bulge", c: "#fbbf24", d: "Central spheroidal concentration of older stars. Hosts Sgr A* (4M solar mass black hole).", p: [0, 0, 0] },
+                    { n: "Perseus Arm", c: "#f87171", d: "One of two major spiral arms. Rich in young blue stars and HII regions.", p: [.5, .1, 0] },
+                    { n: "Sagittarius Arm", c: "#a78bfa", d: "Our arm — a minor spur where the Solar System resides.", p: [-.4, .1, 0] },
+                    { n: "Galactic Bar", c: "#fcd34d", d: "Bar-shaped concentration of stars crossing the nucleus. The Milky Way is a barred spiral.", p: [.2, 0, 0] },
+                    { n: "Galactic Halo", c: "#f9a8d4", d: "Spherical halo of old stars, globular clusters, and dark matter.", p: [0, .4, 0] },
+                    { n: "Star-forming Nebulae", c: "#34d399", d: "Giant molecular clouds in spiral arms where new stars form over millions of years.", p: [.6, 0, .3] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
+                    const arms = 4, maxR = 130;
+                    if (f < 0.12) {
+                        const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1);
+                        const r = 16 * Math.pow(rand(), .4);
+                        return { p: [Math.sin(v) * Math.cos(u) * r, Math.cos(v) * r * 0.55, Math.sin(v) * Math.sin(u) * r], c: [1, .92 + rand() * .08, .4 + rand() * .3], z: .4 + rand() * 1.4 };
+                    }
+                    if (f < 0.16) {
+                        const h = (rand() - 0.5) * 35, r = 2 + rand() * 2, a = rand() * Math.PI * 2;
+                        return { p: [h, 0 + Math.sin(a) * r * 0.2, r * Math.cos(a) * 0.4], c: [1, .85, .35], z: .3 + rand() };
+                    }
+                    if (f < 0.82) {
+                        const arm = Math.floor(rand() * arms);
+                        const rad = Math.pow(rand(), 1.6) * maxR, ang = rad * 0.065 + (arm / arms) * Math.PI * 2;
+                        const spread = 4 + rad * 0.12, jx = (rand() - 0.5) * spread, jz = (rand() - 0.5) * spread;
+                        const x = Math.cos(ang) * rad + jx, z = Math.sin(ang) * rad + jz, t = rad / maxR;
+                        const isHII = rand() > .88;
+                        let c;
+                        if (isHII) c = [.98, .45, .88];
+                        else if (t < 0.15) c = [1, .9, .55];
+                        else if (t < 0.5) c = [.6 + t * .3, .55 + t * .25, 1];
+                        else c = [.4, .5, .95];
+                        return { p: [x, (rand() - 0.5) * 2.5, z], c: c.map(v => v * (.6 + rand() * .4)), z: .15 + rand() * 1.4 };
+                    }
+                    if (f < 0.92) {
+                        const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1), r = 80 + rand() * 60;
+                        return { p: [Math.sin(v) * Math.cos(u) * r, Math.cos(v) * r * 0.65, Math.sin(v) * Math.sin(u) * r], c: [.98, .64, .83], z: .1 + rand() * .35 };
+                    }
+                    const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1), sr = 600 + rand() * 300;
+                    return { p: [Math.sin(v) * Math.cos(u) * sr, Math.cos(v) * sr, Math.sin(v) * Math.sin(u) * sr], c: [1, 1, 1], z: .08 + rand() * .2 };
+                }
+            },
 
-  // Smooth zoom
-  scale += (targetScale - scale) * 0.07;
-  points.scale.setScalar(scale);
+            /* ── NEBULA ── */
+            nebula: {
+                name: "Eagle Nebula (M16)", cat: "Stellar Nursery · Space Science", subj: "Space", icon: "✨", col: "#a78bfa",
+                desc: "The Eagle Nebula's 'Pillars of Creation' are 4–5 light-years tall. New stars form inside these dense gas columns over 100,000+ years. Located 6,500 light-years away.",
+                parts: [
+                    { n: "Pillar I — Finger of God", c: "#f87171", d: "Tallest pillar (~4 light-years). Dense molecular hydrogen. Proto-stellar objects detected via infrared.", p: [0, .5, 0] },
+                    { n: "Pillar II", c: "#fb923c", d: "Second column with several EGGs — cocoons of gas collapsing into new stars.", p: [.4, .2, 0] },
+                    { n: "Pillar III", c: "#fbbf24", d: "Smaller stubby pillar being eroded by UV radiation from nearby O-type stars.", p: [-.35, .1, 0] },
+                    { n: "Ionization Front", c: "#60a5fa", d: "Glowing boundary where UV radiation ionizes hydrogen gas, creating HII regions.", p: [0, .8, 0] },
+                    { n: "H-alpha Emission", c: "#f87171", d: "656nm red light from electron transitions in ionized hydrogen. Defines the classic nebula glow.", p: [-.5, .3, 0] },
+                    { n: "O-type Stars (NGC 6611)", c: "#bfdbfe", d: "Young hot stars providing UV radiation that sculpts the pillars over millions of years.", p: [.2, .9, 0] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
+                    if (f < 0.35) {
+                        const h = -30 + Math.pow(rand(), .7) * 65, taper = Math.max(.3, 1 - h / 70);
+                        const a = rand() * Math.PI * 2, r = (5 + Math.sin(h * .15) * 2) * taper + rand() * 2;
+                        const cr = 0.7 + h / 65 * .2, dusty = rand() > .7;
+                        return { p: [Math.cos(a) * r, h, Math.sin(a) * r * .6], c: dusty ? [.3, .25, .2] : [cr, .3, .15 + h / 65 * .2], z: .4 + rand() * 1.8 };
+                    }
+                    if (f < 0.55) {
+                        const h = -20 + Math.pow(rand(), .7) * 48, taper = Math.max(.3, 1 - h / 55);
+                        const a = rand() * Math.PI * 2, r = (4 + Math.sin(h * .2) * 1.5) * taper + rand() * 1.8;
+                        return { p: [18 + Math.cos(a) * r, h - 5, Math.sin(a) * r * .55], c: [.98, .5 + h / 48 * .2, .15], z: .35 + rand() * 1.5 };
+                    }
+                    if (f < 0.68) {
+                        const h = -15 + Math.pow(rand(), .7) * 32, taper = Math.max(.35, 1 - h / 40);
+                        const a = rand() * Math.PI * 2, r = (3.5 + Math.sin(h * .3)) * taper + rand() * 1.5;
+                        return { p: [-16 + Math.cos(a) * r, h - 8, Math.sin(a) * r * .5], c: [.98, .68, .18], z: .35 + rand() * 1.3 };
+                    }
+                    if (f < 0.82) {
+                        const arm = i % 5, aA = (arm / 5) * Math.PI * 2, dist = 5 + Math.pow(rand(), 1.3) * 70;
+                        const a = aA + dist * .04 + (rand() - 0.5) * .8, sp = 10 + dist * .35;
+                        const x = Math.cos(a) * dist + (rand() - 0.5) * sp, y = 10 + rand() * 30, z = Math.sin(a) * dist + (rand() - 0.5) * sp;
+                        const t = dist / 70, tp = arm % 3;
+                        let c = tp === 0 ? [.95 - t * .3, .2 + t * .4, .7 + t * .2] : tp === 1 ? [.6 + t * .2, .1, 1 - t * .3] : [.2, .65 + t * .25, .95 - t * .2];
+                        return { p: [x, y, z], c: c.map(v => v * (.55 + rand() * .45)), z: .4 + rand() * 2.5 };
+                    }
+                    const starN = 6, sI = Math.floor(rand() * starN);
+                    const sX = [10, 30, -15, 22, -8, 35][sI], sY = [60, 65, 55, 70, 62, 58][sI];
+                    const u = rand() * Math.PI * 2, r = Math.pow(rand(), .5) * 4;
+                    return { p: [sX + Math.cos(u) * r, sY + Math.sin(u) * r, (rand() - 0.5) * 8], c: [.88, .93, 1], z: .6 + rand() * 2 };
+                }
+            },
 
-  const pos = geo.attributes.position.array;
-  const col = geo.attributes.aColor.array;
-  const sz  = geo.attributes.aSize.array;
+            /* ── ATOM ── */
+            atom: {
+                name: "Carbon Atom", cat: "Atomic Structure · Chemistry", subj: "Chemistry", icon: "⚛️", col: "#38d9a9",
+                desc: "Carbon (Z=6): 6 protons, 6 neutrons, 6 electrons. 4 valence electrons allow 4 simultaneous covalent bonds — the foundation of organic chemistry.",
+                parts: [
+                    { n: "Nucleus (6p + 6n)", c: "#f87171", d: "6 protons and 6 neutrons packed into a nucleus ~10⁻¹⁵m across.", p: [0, 0, 0] },
+                    { n: "K Shell — 1s² (2e⁻)", c: "#fbbf24", d: "Innermost shell, completely filled with 2 electrons. Lowest energy level.", p: [0, 0, 0] },
+                    { n: "L Shell — 2s²2p² (4e⁻)", c: "#60a5fa", d: "Second shell holds 4 valence electrons responsible for all carbon bonding.", p: [0, 0, 0] },
+                    { n: "sp³ Hybrid Orbitals", c: "#34d399", d: "In diamond: 4 equivalent tetrahedral orbitals at 109.5°.", p: [0, 0, .5] },
+                    { n: "Electron Cloud", c: "#a78bfa", d: "Quantum probability distribution — electrons exist as waves, not in fixed orbits.", p: [0, 0, 0] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
+                    if (f < 0.12) { const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1), r = 4.5 * Math.pow(rand(), .4); return { p: [Math.sin(v) * Math.cos(u) * r, Math.cos(v) * r, Math.sin(v) * Math.sin(u) * r], c: [.97, .35 + rand() * .2, .3], z: .6 + rand() * 1.4 }; }
+                    if (f < 0.28) {
+                        const e = Math.floor(rand() * 2), a = rand() * Math.PI * 2, shellR = 10, tA = [0, Math.PI / 2][e];
+                        const x = Math.cos(a) * shellR, y = Math.sin(a) * shellR * Math.cos(tA), z = Math.sin(a) * shellR * Math.sin(tA);
+                        const near = Math.abs(a % (Math.PI * .08)) < .04;
+                        return { p: [x + (rand() - 0.5) * .8, y + (rand() - 0.5) * .8, z + (rand() - 0.5) * .8], c: near ? [1, .88, .2] : [1, .75, .15], z: .35 + rand() * .65 };
+                    }
+                    if (f < 0.62) {
+                        const e = Math.floor(rand() * 4), shellR = 20;
+                        const angles = [[0, 0], [Math.PI, 0], [Math.PI * .5, Math.PI * .5], [Math.PI * .5, -Math.PI * .5]][e];
+                        const a = rand() * Math.PI * 2, bx = Math.cos(angles[0]) * shellR, by = Math.sin(angles[0]) * shellR;
+                        const x = bx + Math.cos(a) * (shellR * .1), y = by + Math.sin(a) * (shellR * .1), z = angles[1] * shellR * .5 + (rand() - 0.5) * 1.5;
+                        return { p: [x + (rand() - 0.5) * 1.2, y + (rand() - 0.5) * 1.2, z], c: rand() > .8 ? [.4, .75, 1] : [.38, .65, .98], z: .3 + rand() * .7 };
+                    }
+                    if (f < 0.82) {
+                        const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1), r = 8 + rand() * 18;
+                        const density = Math.exp(-r * .08) * 1.5;
+                        if (rand() > density) return { p: [(rand() - 0.5) * 50, (rand() - 0.5) * 50, (rand() - 0.5) * 50], c: [.2, .15, .35], z: .05 };
+                        return { p: [Math.sin(v) * Math.cos(u) * r, Math.cos(v) * r, Math.sin(v) * Math.sin(u) * r], c: [.67, .45, .98], z: .1 + rand() * .3 };
+                    }
+                    const d = [[1, 1, 1], [-1, -1, 1], [-1, 1, -1], [1, -1, -1]][Math.floor(rand() * 4)];
+                    const r = 10 + Math.pow(rand(), 1.5) * 18;
+                    return { p: [d[0] * r * .6, d[1] * r * .6, d[2] * r * .6], c: [.2, .85, .6], z: .2 + rand() * .5 };
+                }
+            },
 
-  if (lerpT < 1) {
-    lerpT = Math.min(1, lerpT + 0.012);
-    const e = easeInOut(lerpT);
-    for (let i = 0; i < N * 3; i++) {
-      pos[i] += (targetPositions[i] - pos[i]) * (0.05 + e * 0.03);
-      col[i] += (targetColors[i]    - col[i]) * 0.04;
-    }
-    for (let i = 0; i < N; i++) sz[i] += (targetSizes[i] - sz[i]) * 0.05;
-  } else {
-    // Idle organic turbulence
-    const amp = currentShape === 1 ? 0.12 : 0.04;
-    for (let i = 0; i < N; i++) {
-      const idx = i * 3;
-      const t2  = clock * 3 + i * 0.008;
-      pos[idx]   += (targetPositions[idx]   + Math.sin(t2)         * amp - pos[idx])   * 0.035;
-      pos[idx+1] += (targetPositions[idx+1] + Math.cos(t2 * 0.9)   * amp - pos[idx+1]) * 0.035;
-      pos[idx+2] += (targetPositions[idx+2] + Math.sin(t2 * 1.1)   * amp - pos[idx+2]) * 0.035;
-    }
-  }
+            /* ── WATER MOLECULE ── */
+            water: {
+                name: "Water Molecule (H₂O)", cat: "Molecular Chemistry · Chemistry", subj: "Chemistry", icon: "💧", col: "#60a5fa",
+                desc: "Water's 104.5° bond angle creates a polar molecule giving it exceptional properties: high boiling point, surface tension, and its role as 'universal solvent'.",
+                parts: [
+                    { n: "Oxygen Atom (δ-)", c: "#ef4444", d: "Central atom (Z=8, electronegativity 3.44). Two lone pairs create V-shape geometry.", p: [0, 0, 0] },
+                    { n: "Hydrogen Atom 1 (δ+)", c: "#60a5fa", d: "Partially positive — oxygen pulls shared electrons away. Enables H-bonding.", p: [.6, .5, 0] },
+                    { n: "Hydrogen Atom 2 (δ+)", c: "#7dd3fc", d: "Second hydrogen at 104.5° from H1. Creates the molecular dipole moment.", p: [-.6, .5, 0] },
+                    { n: "Lone Pair Electrons", c: "#a78bfa", d: "Two lone pairs on oxygen. Repel H-O bonds, compressing angle from 109.5° to 104.5°.", p: [0, -.3, 0] },
+                    { n: "Hydrogen Bonds", c: "#fcd34d", d: "Partial charges allow H atoms to attract O of neighboring molecules. 4 H-bonds per water on average.", p: [1.2, .8, 0] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
+                    const mol = Math.floor(f * 9), mf = (f * 9) % 1;
+                    // 9 water molecules arranged in a realistic H-bond network (tetrahedral coordination)
+                    const clusters = [
+                        { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0 },
+                        { x: 15, y: 21, z: -7, rx: 0.2, ry: 0, rz: 2.14 },
+                        { x: -15, y: 21, z: -7, rx: 0.2, ry: 0, rz: -2.14 },
+                        { x: 11, y: -21, z: 13, rx: -0.4, ry: 1.57, rz: -0.5 },
+                        { x: -11, y: -21, z: 13, rx: -0.4, ry: -1.57, rz: 0.5 },
+                        { x: 0, y: 0, z: 22, rx: 0.5, ry: 0, rz: 0 },
+                        { x: 32, y: 5, z: -18, rx: 0.8, ry: -0.4, rz: 1.57 },
+                        { x: -32, y: 5, z: -18, rx: 0.8, ry: 0.4, rz: -1.57 },
+                        { x: 2, y: 44, z: -9, rx: -0.2, ry: 0.2, rz: 3.14 },
+                    ];
+                    const mo = clusters[mol];
+                    const rot = (px, py, pz) => {
+                        let x1 = px * Math.cos(mo.rz) - py * Math.sin(mo.rz);
+                        let y1 = px * Math.sin(mo.rz) + py * Math.cos(mo.rz);
+                        let y2 = y1 * Math.cos(mo.rx) - pz * Math.sin(mo.rx);
+                        let z2 = y1 * Math.sin(mo.rx) + pz * Math.cos(mo.rx);
+                        let x3 = x1 * Math.cos(mo.ry) + z2 * Math.sin(mo.ry);
+                        let z3 = -x1 * Math.sin(mo.ry) + z2 * Math.cos(mo.ry);
+                        return [mo.x + x3, mo.y + y2, mo.z + z3];
+                    };
+                    // H-bond connector between molecules (shown as faint bridges)
+                    if (mf > 0.96) return { p: rot(0, 0, 0), c: [0.88, 0.82, 1], z: 0.18 + rand() * 0.35 };
+                    // Oxygen — large electron-rich center (ionic radius 140pm)
+                    if (mf < 0.32) {
+                        const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1);
+                        const r = 7.5 * Math.pow(rand(), 0.38); // electron density falloff
+                        return { p: rot(Math.sin(v) * Math.cos(u) * r, Math.cos(v) * r * 0.95, Math.sin(v) * Math.sin(u) * r), c: [0.97, 0.26, 0.26], z: 0.45 + rand() };
+                    }
+                    // Hydrogen 1 — δ+ partial charge, small (25pm), 104.5° geometry
+                    if (mf < 0.52) {
+                        const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1);
+                        const r = 4.8 * Math.pow(rand(), 0.42);
+                        return { p: rot(11.2 + Math.sin(v) * Math.cos(u) * r, 9.5 + Math.cos(v) * r, Math.sin(v) * Math.sin(u) * r), c: [0.36, 0.63, 0.97], z: 0.3 + rand() * 0.8 };
+                    }
+                    // Hydrogen 2 — 104.5° from H1 (O-H bond angle)
+                    if (mf < 0.70) {
+                        const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1);
+                        const r = 4.8 * Math.pow(rand(), 0.42);
+                        return { p: rot(-11.2 + Math.sin(v) * Math.cos(u) * r, 9.5 + Math.cos(v) * r, Math.sin(v) * Math.sin(u) * r), c: [0.46, 0.77, 0.99], z: 0.3 + rand() * 0.8 };
+                    }
+                    // Lone pairs — 2 electron pairs pointing away from H atoms (tetrahedral)
+                    if (mf < 0.84) {
+                        const lp = rand() > 0.5 ? 1 : -1;
+                        const u = rand() * Math.PI * 2, r = 2.5 + rand() * 3.5;
+                        return { p: rot(lp * 5.5 + Math.cos(u) * r, -7 + Math.sin(u) * r * 0.48, (rand() - 0.5) * 2.8), c: [0.65, 0.43, 0.97], z: 0.28 + rand() * 0.55 };
+                    }
+                    // Hydrogen bonds — shown as dashed bridges to neighboring O atoms
+                    const side = mf < 0.92 ? 1 : -1, t2 = rand();
+                    return { p: rot(t2 * 11.5 * side, t2 * 9.5, (rand() - 0.5) * 1.8), c: [0.18, 0.84, 0.58], z: 0.25 + rand() * 0.45 };
+                }
+            },
 
-  geo.attributes.position.needsUpdate = true;
-  geo.attributes.aColor.needsUpdate   = true;
-  geo.attributes.aSize.needsUpdate    = true;
-  renderer.render(scene, camera);
-}
+            /* ── EARTH INTERIOR ── */
+            earth: {
+                name: "Earth's Interior", cat: "Geology · Earth Science", subj: "Earth", icon: "🌍", col: "#38d9a9",
+                desc: "Earth's layered structure formed by density separation 4.5 billion years ago. The liquid outer core convection generates our magnetic field.",
+                parts: [
+                    { n: "Inner Core", c: "#fbbf24", d: "Solid iron-nickel sphere, radius 1,220km, ~5,400°C. Solid due to immense pressure (360 GPa).", p: [0, 0, 0] },
+                    { n: "Outer Core", c: "#fb923c", d: "Liquid iron-nickel layer, 2,200km thick, 4,000–5,000°C. Generates Earth's magnetic field.", p: [0, .3, 0] },
+                    { n: "Lower Mantle", c: "#f87171", d: "Dense perovskite silicates, 2,300km thick. Solid but deforms plastically over geological timescales.", p: [0, .6, 0] },
+                    { n: "Upper Mantle & Asthenosphere", c: "#a78bfa", d: "Partially molten zone allowing tectonic plates to drift at 2–15 cm/year.", p: [0, .8, 0] },
+                    { n: "Crust (Oceanic)", c: "#38d9a9", d: "Basaltic rock, 5–10km thick, dense — subducts under continental crust.", p: [.8, .95, 0] },
+                    { n: "Crust (Continental)", c: "#6ee7b7", d: "Granitic rock, 30–70km thick. Oldest rocks ~4 billion years.", p: [-.5, .97, 0] },
+                    { n: "Magnetic Field Lines", c: "#60a5fa", d: "Generated by outer core convection. Deflects solar wind, protecting life on the surface.", p: [0, 0, .5] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
+                    const su = () => rand() * Math.PI * 2, sv = () => Math.acos(2 * rand() - 1);
+                    // Inner core — solid Fe-Ni, 1220km radius (r=5 units)
+                    if (f < 0.08) {
+                        const u = su(), v = sv(), r = 4.8 * (1 + Math.sin(u * 4) * 0.018) + rand() * 0.2;
+                        return { p: [Math.sin(v) * Math.cos(u) * r, Math.cos(v) * r, Math.sin(v) * Math.sin(u) * r], c: [1, 0.9 + rand() * 0.1, 0.22], z: 0.6 + rand() * 1.2 };
+                    }
+                    // Outer core — liquid Fe-Ni, 3480km radius (r=11 units), convective plumes
+                    if (f < 0.20) {
+                        const r = 5.2 + Math.pow(rand(), 0.55) * 5.8 + (rand() - 0.5) * 0.35, u = su(), v = sv();
+                        const convect = Math.sin(u * 6 + v * 4) * 0.15; // turbulent convection texture
+                        return { p: [Math.sin(v) * Math.cos(u) * r, Math.cos(v) * r, Math.sin(v) * Math.sin(u) * r], c: [0.98 + convect, 0.5 + rand() * 0.12, 0.08], z: 0.4 + rand() * 0.8 };
+                    }
+                    // Lower mantle — perovskite, 2900km thick (r=11→18.5)
+                    if (f < 0.37) {
+                        const r = 11.2 + Math.pow(rand(), 0.55) * 7.2 + (rand() - 0.5) * 0.3, u = su(), v = sv();
+                        const pm = r < 12.5 && rand() > 0.72; // D'' layer (core-mantle boundary)
+                        return { p: [Math.sin(v) * Math.cos(u) * r, Math.cos(v) * r, Math.sin(v) * Math.sin(u) * r], c: pm ? [0.78, 0.38, 0.88] : [0.97, 0.36, 0.18], z: 0.35 + rand() * 0.65 };
+                    }
+                    // Upper mantle + asthenosphere — partial melt, r=18.5→20
+                    if (f < 0.52) {
+                        const r = 18.5 + Math.pow(rand(), 0.6) * 1.5 + (rand() - 0.5) * 0.28, u = su(), v = sv();
+                        const melt = r < 19.2 && rand() > 0.6; // asthenosphere partial melt pockets
+                        return { p: [Math.sin(v) * Math.cos(u) * r, Math.cos(v) * r, Math.sin(v) * Math.sin(u) * r], c: melt ? [0.82, 0.4, 0.9] : [0.65, 0.43, 0.97], z: 0.35 + rand() * 0.62 };
+                    }
+                    // Crust — oceanic vs continental with realistic thickness difference
+                    if (f < 0.67) {
+                        const u = su(), v = sv(), r = 19.95 + (rand() - 0.5) * 0.35;
+                        const isCont = Math.sin(u * 3) * Math.cos(v * 2) > 0.18;
+                        return { p: [Math.sin(v) * Math.cos(u) * r, Math.cos(v) * r, Math.sin(v) * Math.sin(u) * r], c: isCont ? [0.42, 0.88, 0.67] : [0.22, 0.72, 0.65], z: 0.28 + rand() * 0.48 };
+                    }
+                    // Oceans + atmosphere
+                    if (f < 0.82) {
+                        const u = su(), v = sv(), r = 20.4 + rand() * 1.4;
+                        const isAtm = r > 20.7;
+                        return { p: [Math.sin(v) * Math.cos(u) * r, Math.cos(v) * r, Math.sin(v) * Math.sin(u) * r], c: isAtm ? [0.38, 0.58, 0.92] : [0.2, 0.62, 0.97], z: 0.18 + rand() * 0.3 };
+                    }
+                    // Magnetic field lines — 8 dipole loops with realistic tilt (11.5°)
+                    const fieldLine = Math.floor(rand() * 8), flA = (fieldLine / 8) * Math.PI * 2;
+                    const t = rand() * Math.PI, dipoleR = 24 + Math.sin(t) * 10;
+                    const tilt = 0.2; // ~11.5° tilt
+                    return {
+                        p: [
+                            Math.cos(flA) * dipoleR * Math.sin(t),
+                            Math.cos(t) * dipoleR * 1.3 + Math.sin(t) * dipoleR * tilt,
+                            Math.sin(flA) * dipoleR * Math.sin(t) * 0.6
+                        ], c: [0.36, 0.63, 0.97], z: 0.1 + rand() * 0.28
+                    };
+                }
+            },
 
-/* ─────────────────────────────────────────────
-   MEDIAPIPE HAND TRACKING
-───────────────────────────────────────────── */
-let handLandmarker = null;
-let lastVideoTime  = -1;
+            /* ── VOLCANO ── */
+            volcano: {
+                name: "Composite Volcano", cat: "Geology · Earth Science", subj: "Earth", icon: "🌋", col: "#fb923c",
+                desc: "Stratovolcanoes are built from alternating lava and pyroclastic layers. Mt. Fuji, Vesuvius, Mt. St. Helens are classic examples.",
+                parts: [
+                    { n: "Magma Chamber", c: "#f87171", d: "Underground reservoir 1–10km deep, 700–1,300°C. Pressure builds over decades before eruption.", p: [0, -.6, 0] },
+                    { n: "Main Conduit", c: "#fb923c", d: "Central channel connecting magma chamber to the crater.", p: [0, -.1, 0] },
+                    { n: "Eruption Column", c: "#9ca3af", d: "Plinian eruption column can reach 45km into the stratosphere at speeds of 600 m/s.", p: [0, .7, 0] },
+                    { n: "Lava Flow", c: "#ef4444", d: "Basaltic lava flows at 700–1,200°C. Viscous andesitic/rhyolitic lava barely moves.", p: [.6, .1, 0] },
+                    { n: "Pyroclastic Flow", c: "#d97706", d: "Superheated gas + rock mixture at 700°C, up to 700 km/h. Most lethal volcanic hazard.", p: [.7, .2, 0] },
+                    { n: "Ash Fall", c: "#6b7280", d: "Fine volcanic ash (<2mm) travels thousands of km. Disrupts aviation, damages lungs.", p: [-.4, .6, 0] },
+                    { n: "Lava Layers (Stratigraphy)", c: "#92400e", d: "Alternating bands of hardened lava and pyroclastic deposits. Makes it 'composite'.", p: [.9, .0, 0] },
+                ],
+                g: (i, N) => {
+                    const f = i / N;
+                    if (f < 0.22) {
+                        const h = rand(), baseR = 22 * (1 - h * .95);
+                        const a = rand() * Math.PI * 2, r = baseR * (.88 + rand() * .14), y = -20 + h * 44;
+                        const layer = Math.floor((h * 44 + 20) / 4), isLava = layer % 2 === 0;
+                        return { p: [Math.cos(a) * r, y, Math.sin(a) * r * .85], c: isLava ? [.45 - .1 * h, .3 - .08 * h, .2 - .05 * h] : [.55 - .1 * h, .4 - .1 * h, .3 - .08 * h], z: .35 + rand() * .65 };
+                    }
+                    if (f < 0.36) {
+                        const u = rand() * Math.PI * 2, v = Math.acos(2 * rand() - 1), r = 12 * Math.pow(rand(), .4);
+                        const glow = 1 - r / 12;
+                        return { p: [Math.sin(v) * Math.cos(u) * r, -30 + Math.cos(v) * r * .7, Math.sin(v) * Math.sin(u) * r], c: [1, .25 + glow * .2, .02 + glow * .1], z: .5 + rand() * 1.2 };
+                    }
+                    if (f < 0.50) {
+                        const a = rand() * Math.PI * 2, r = 3 + rand() * .8, h = -28 + rand() * 58;
+                        return { p: [Math.cos(a) * r * .6, h, Math.sin(a) * r * .6], c: h > 10 ? [1, .35, .05] : [.8, .25, .05], z: .45 + rand() * .8 };
+                    }
+                    if (f < 0.58) {
+                        const flank = i % 3 - 1, h = 15 - rand() * 25, sR = 5 + Math.abs(15 - h) * .4;
+                        return { p: [flank * sR + (rand() - 0.5) * 8, h, sR * .7 * Math.abs(flank) + (rand() - 0.5) * 4], c: [1 - .1 * rand(), .25, .03], z: .4 + rand() * .8 };
+                    }
+                    if (f < 0.66) {
+                        const a = (rand() - 0.5) * .8 + Math.PI * .3, h = 10 - rand() * 15, r = 20 + rand() * 20;
+                        return { p: [Math.cos(a) * r, h, Math.sin(a) * r * .7], c: [.88, .45, .1], z: .35 + rand() };
+                    }
+                    if (f < 0.80) {
+                        const h = 24 + Math.pow(rand(), 1.2) * 60, sR = h * .18 + rand() * 10;
+                        const a = rand() * Math.PI * 2, hot = h < 40;
+                        return { p: [Math.cos(a) * sR * (.3 + rand() * .7), h, Math.sin(a) * sR * .8], c: hot ? [.7, .35, .25] : [.45, .42, .4], z: .3 + rand() * 1.8 };
+                    }
+                    const a = rand() * Math.PI * 2, r = 22 + rand() * 18;
+                    return { p: [Math.cos(a) * r, -20 + (rand() - 0.5) * 2, Math.sin(a) * r * .8], c: [.28, .24, .22], z: .25 + rand() * .4 };
+                }
+            },
 
-async function initMediaPipe() {
-  loadingBar.style.width = "30%";
-  const vision = await FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
-  );
-  loadingBar.style.width = "65%";
-  handLandmarker = await HandLandmarker.createFromOptions(vision, {
-    baseOptions: {
-      modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
-      delegate: "GPU"
-    },
-    runningMode: "VIDEO",
-    numHands: 1
-  });
-  loadingBar.style.width = "100%";
-  setTimeout(() => { loadingBar.style.opacity = "0"; }, 500);
-  hud.style.display    = "block";
-  legend.style.display = "flex";
-  setShape(0);
-  detect();
-}
+            /* ── PLATE TECTONICS ── */
+            tectonic: {
+                name: "Plate Tectonics", cat: "Geology · Earth Science", subj: "Earth", icon: "🏔️", col: "#34d399",
+                desc: "Earth's crust is divided into 15+ major tectonic plates moving at 2–15 cm/year. Plate collisions build mountains, create subduction trenches up to 11km deep, and cause 90% of earthquakes.",
+                parts: [
+                    { n: "Divergent Boundary", c: "#38d9a9", d: "Plates move apart — magma wells up creating new oceanic crust at mid-ocean ridges.", p: [-.8, 0, 0] },
+                    { n: "Convergent (Subduction)", c: "#f87171", d: "Dense oceanic plate dives beneath lighter plate. Creates trenches, volcanoes, earthquakes.", p: [.6, .1, 0] },
+                    { n: "Transform Boundary", c: "#fbbf24", d: "Plates slide horizontally past each other. San Andreas Fault is a classic example.", p: [0, 0, .7] },
+                    { n: "Continental Plate", c: "#a78bfa", d: "Thick (30–70km), less dense granitic crust. Collisions build mountains like the Himalayas.", p: [-.5, .1, 0] },
+                    { n: "Oceanic Plate", c: "#60a5fa", d: "Thin (5–10km), dense basaltic crust. Subducts under continental plates.", p: [.5, -.1, 0] },
+                    { n: "Mid-Ocean Ridge", c: "#34d399", d: "60,000km underwater mountain chain. New crust forms here continuously.", p: [-.9, -.1, 0] },
+                    { n: "Subduction Trench", c: "#4b5563", d: "Deep ocean trench (up to 11km) where oceanic crust dives into the mantle.", p: [.8, -.2, 0] },
+                    { n: "Mantle Convection", c: "#fb923c", d: "Heat from Earth's core drives slow mantle circulation — the engine driving plate motion.", p: [0, -.5, 0] },
+                ],
+                g: (i, N) => {
+                    const f = i / N, W = 90, D = 40;
+                    if (f < 0.15) {
+                        const x = (rand() - 0.5) * W * 2, y = -20 - rand() * 20, z = (rand() - 0.5) * D * 2;
+                        const heat = Math.abs(x) / W;
+                        return { p: [x, y, z], c: [.98, .4 + heat * .2, .1 + heat * .1], z: .2 + rand() * .4 };
+                    }
+                    if (f < 0.35) {
+                        const x = -10 - rand() * 60, h = rand() * 5, z = (rand() - 0.5) * D * 1.6;
+                        return { p: [x, -h * .4 + 3, z], c: [.6, .5, .95], z: .3 + rand() * .6 };
+                    }
+                    if (f < 0.55) {
+                        const t = rand(), x = 10 + t * 60, sub = t > .7 ? (t - .7) * 3.5 : 0;
+                        const y = -2 - sub * 8, z = (rand() - 0.5) * D * 1.4;
+                        return { p: [x, y + (rand() - 0.5) * 1.5, z], c: [.38, .55, .98], z: .3 + rand() * .65 };
+                    }
+                    if (f < 0.65) {
+                        const x = -5 + (rand() - 0.5) * 8, y = 4 + Math.sin((x + 5) * .5) * 3, z = (rand() - 0.5) * D * 2;
+                        return { p: [x, y + (rand() - 0.5) * 2, z], c: [.22, .85, .6], z: .4 + rand() * .7 };
+                    }
+                    if (f < 0.72) {
+                        const t = rand(), x = 55 + t * 12, depth = -6 - Math.sin(t * Math.PI) * 6, z = (rand() - 0.5) * D * 1.2;
+                        return { p: [x, depth + (rand() - 0.5), z], c: [.25, .3, .45], z: .3 + rand() * .5 };
+                    }
+                    if (f < 0.82) {
+                        const x = 30 + rand() * 18, vH = 2 + Math.pow(rand(), .5) * 12, z = (rand() - 0.5) * D;
+                        return { p: [x, vH, z], c: [.98, .4, .15], z: .4 + rand() * 1.2 };
+                    }
+                    if (f < 0.90) {
+                        const x = -30 + rand() * 18, mH = 3 + Math.pow(rand(), .5) * 15, z = (rand() - 0.5) * D;
+                        return { p: [x, mH * (1 - Math.abs(z) / D), z], c: [.55, .5, .48], z: .35 + rand() * .8 };
+                    }
+                    const fault = Math.floor(rand() * 3);
+                    const fx = [[-5, 4], [30, -8], [0, 0]][fault];
+                    return { p: [fx[0] + (rand() - 0.5) * 5, fx[1] + (rand() - 0.5) * 4, (rand() - 0.5) * D * 1.5], c: [1, .82, .25], z: .4 + rand() * .6 };
+                }
+            },
 
-function handOpenness(lm) {
-  const wrist = lm[0];
-  const tips  = [8, 12, 16, 20];
-  let d = 0;
-  tips.forEach(t => {
-    const dx = lm[t].x - wrist.x;
-    const dy = lm[t].y - wrist.y;
-    d += Math.sqrt(dx * dx + dy * dy);
-  });
-  return d / 4;
-}
+        }; // end M
 
-function pinchDist(lm) {
-  const dx = lm[4].x - lm[8].x;
-  const dy = lm[4].y - lm[8].y;
-  return Math.sqrt(dx * dx + dy * dy);
-}
+        const GROUPS = [
+            { label: "Human Anatomy", color: "#ff6b6b", keys: ["heart", "brain", "lung", "eye", "neuron", "kidney"] },
+            { label: "Cell & Molecular Biology", color: "#fbbf24", keys: ["cell", "dna"] },
+            { label: "Space Science", color: "#60a5fa", keys: ["solarsystem", "blackhole", "galaxy", "nebula"] },
+            { label: "Chemistry", color: "#38d9a9", keys: ["atom", "water"] },
+            { label: "Earth Science", color: "#fb923c", keys: ["earth", "volcano", "tectonic"] },
+        ];
+        const ALL_KEYS = GROUPS.flatMap(g => g.keys);
 
-function detect() {
-  if (!handLandmarker || vid.readyState < 2) {
-    requestAnimationFrame(detect);
-    return;
-  }
-  const now = performance.now();
-  if (vid.currentTime !== lastVideoTime) {
-    lastVideoTime = vid.currentTime;
-    const res = handLandmarker.detectForVideo(vid, now);
+        /* ═══════════════════════════════════════════════════════
+           THREE.JS SETUP
+        ═══════════════════════════════════════════════════════ */
+        const N = 22000;
+        const cv = document.getElementById("c");
+        const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        renderer.setSize(innerWidth, innerHeight);
+        renderer.setClearColor(0x02020c, 1);
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x02020c, .002);
+        const cam = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, .1, 3000);
+        cam.position.set(0, 12, 82); cam.lookAt(0, 0, 0);
 
-    if (res.landmarks && res.landmarks.length > 0) {
-      const lm = res.landmarks[0];
+        window.addEventListener("resize", () => {
+            renderer.setSize(innerWidth, innerHeight);
+            cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix();
+            lc.width = innerWidth; lc.height = innerHeight;
+        });
 
-      // Rotation from wrist position
-      targetRotX = (lm[0].y - 0.5) * Math.PI * 0.3;
-      targetRotY = (lm[0].x - 0.5) * Math.PI * 0.5;
+        // Starfield
+        const sG = new THREE.BufferGeometry(), sP = new Float32Array(3000 * 3);
+        for (let i = 0; i < 3000; i++) { const r = 600 + rand() * 600, t = rand() * Math.PI * 2, p = Math.acos(2 * rand() - 1); sP[i * 3] = r * Math.sin(p) * Math.cos(t); sP[i * 3 + 1] = r * Math.cos(p); sP[i * 3 + 2] = r * Math.sin(p) * Math.sin(t); }
+        sG.setAttribute("position", new THREE.BufferAttribute(sP, 3));
+        scene.add(new THREE.Points(sG, new THREE.PointsMaterial({ color: 0xffffff, size: .55, sizeAttenuation: true, transparent: true, opacity: .28 })));
 
-      // Pinch → zoom
-      const pinch = pinchDist(lm);
-      targetScale = Math.max(0.3, Math.min(2.5,
-        0.4 + (1 - Math.min(pinch, 0.28) / 0.28) * 2.0
-      ));
+        const VS = `attribute float aSize;attribute vec3 aColor;attribute float aPhase;varying vec3 vColor;varying float vAlpha;uniform float uTime;void main(){vColor=aColor;float pulse=.88+.12*sin(uTime*2.4+aPhase);vAlpha=pulse;vec4 mvPos=modelViewMatrix*vec4(position,1.);gl_PointSize=aSize*pulse*(280./-mvPos.z);gl_Position=projectionMatrix*mvPos;}`;
+        const FS = `varying vec3 vColor;varying float vAlpha;void main(){vec2 uv=gl_PointCoord-.5;float r=dot(uv,uv);if(r>.25)discard;float core=exp(-r*28.);float mid=exp(-r*11.)*.42;float glow=exp(-r*3.8)*.1;float a=(core+mid+glow)*vAlpha;gl_FragColor=vec4(vColor*(core*1.25+mid+glow),a);}`;
 
-      // Smooth openness
-      const rawOpen = handOpenness(lm);
-      prevOpenness += (rawOpen - prevOpenness) * 0.2;
+        const geo = new THREE.BufferGeometry();
+        const pos = new Float32Array(N * 3), col = new Float32Array(N * 3), sz = new Float32Array(N), ph = new Float32Array(N);
+        for (let i = 0; i < N; i++) { ph[i] = rand() * Math.PI * 2; sz[i] = .5 + rand() * 2.4; }
+        geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+        geo.setAttribute("aColor", new THREE.BufferAttribute(col, 3));
+        geo.setAttribute("aSize", new THREE.BufferAttribute(sz, 1));
+        geo.setAttribute("aPhase", new THREE.BufferAttribute(ph, 1));
+        const mat = new THREE.ShaderMaterial({ vertexShader: VS, fragmentShader: FS, uniforms: { uTime: { value: 0 } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+        const pts = new THREE.Points(geo, mat);
+        scene.add(pts);
 
-      // Three-zone gesture mapping
-      if      (prevOpenness > 0.38) setShape(2); // galaxy
-      else if (prevOpenness < 0.20) setShape(0); // planet
-      else if (prevOpenness > 0.27) setShape(1); // nebula
+        /* ═══════════════════════════════════════════════════════
+           MORPH STATE
+        ═══════════════════════════════════════════════════════ */
+        let curKey = "heart", tP = new Float32Array(N * 3), tC = new Float32Array(N * 3), tS = new Float32Array(N);
+        let lT = 1, rX = 0, rY = 0, tRX = 0, tRY = 0, sc = 1, tSC = 1, clk = 0;
+        let showLbls = true, qOpen = false, hlP = -1;
 
-      // Update HUD
-      const pct = Math.round(((prevOpenness - 0.15) / 0.30) * 100);
-      document.getElementById("progressFill").style.width  = Math.max(2, Math.min(100, pct)) + "%";
-      document.getElementById("opennessVal").textContent   = (prevOpenness * 100).toFixed(0) + "%";
-      document.getElementById("scaleVal").textContent      = targetScale.toFixed(1) + "×";
-      document.getElementById("handVal").textContent       = "Active";
-      if (prevOpenness > 0.38) {
-        document.getElementById("gestureState").textContent = "Expanding galaxy";
-        document.getElementById("gestureHint").textContent  = "Spiral arms forming";
-      } else if (prevOpenness < 0.20) {
-        document.getElementById("gestureState").textContent = "Condensing planet";
-        document.getElementById("gestureHint").textContent  = "Core collapse in progress";
-      } else {
-        document.getElementById("gestureState").textContent = "Forming nebula";
-        document.getElementById("gestureHint").textContent  = "Stellar nursery active";
-      }
-    } else {
-      document.getElementById("gestureState").textContent = "No hand detected";
-      document.getElementById("gestureHint").textContent  = "Show your hand to the camera";
-      document.getElementById("handVal").textContent      = "Searching…";
-      document.getElementById("progressFill").style.width = "0%";
-    }
-  }
-  requestAnimationFrame(detect);
-}
+        function buildT(key) {
+            const m = M[key];
+            for (let i = 0; i < N; i++) {
+                const d = m.g(i, N);
+                tP[i * 3] = d.p[0]; tP[i * 3 + 1] = d.p[1]; tP[i * 3 + 2] = d.p[2];
+                tC[i * 3] = d.c[0]; tC[i * 3 + 1] = d.c[1]; tC[i * 3 + 2] = d.c[2];
+                tS[i] = d.z || 1;
+            }
+        }
+        function loadM(key, instant = false) {
+            if (key === curKey && !instant) return;
+            curKey = key; hlP = -1; buildT(key);
+            if (instant) { for (let i = 0; i < N * 3; i++) { pos[i] = tP[i]; col[i] = tC[i]; } for (let i = 0; i < N; i++)sz[i] = tS[i]; lT = 1; }
+            else lT = 0;
+            tRX = 0; tRY = 0; tSC = 1;
+            updTB(key); updIP(key); updSB(key);
+            if (qOpen) startQ();
+        }
+        function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
-/* ─────────────────────────────────────────────
-   START
-───────────────────────────────────────────── */
-document.getElementById("startBtn").addEventListener("click", async () => {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { width: 320, height: 240, facingMode: "user" }
-    });
-    vid.srcObject = stream;
-    vid.style.display = "block";
-    await vid.play();
-    overlay.style.transition = "opacity 0.6s ease";
-    overlay.style.opacity    = "0";
-    setTimeout(() => { overlay.style.display = "none"; }, 600);
-    animate();
-    await initMediaPipe();
-  } catch (e) {
-    alert("Camera access is required. Please allow camera permissions and reload the page.");
-  }
-});
-</script>
+        /* ═══════════════════════════════════════════════════════
+           ANIMATION
+        ═══════════════════════════════════════════════════════ */
+        function animate() {
+            requestAnimationFrame(animate); clk += .004; mat.uniforms.uTime.value = clk * 4;
+            rX += (tRX - rX) * .05; rY += (tRY - rY) * .05;
+            pts.rotation.x = rX + Math.sin(clk * .4) * .03;
+            pts.rotation.y = rY + clk * .16;
+            sc += (tSC - sc) * .07; pts.scale.setScalar(sc);
+            if (lT < 1) {
+                lT = Math.min(1, lT + .011); const e = ease(lT);
+                for (let i = 0; i < N * 3; i++) { pos[i] += (tP[i] - pos[i]) * (.04 + e * .025); col[i] += (tC[i] - col[i]) * .038; }
+                for (let i = 0; i < N; i++)sz[i] += (tS[i] - sz[i]) * .042;
+            } else {
+                const amp = .035;
+                for (let i = 0; i < N; i++) {
+                    const ix = i * 3, t2 = clk * 2.5 + i * .007;
+                    pos[ix] += (tP[ix] + Math.sin(t2) * amp - pos[ix]) * .022;
+                    pos[ix + 1] += (tP[ix + 1] + Math.cos(t2 * .9) * amp - pos[ix + 1]) * .022;
+                    pos[ix + 2] += (tP[ix + 2] + Math.sin(t2 * 1.1) * amp - pos[ix + 2]) * .022;
+                }
+            }
+            geo.attributes.position.needsUpdate = true;
+            geo.attributes.aColor.needsUpdate = true;
+            geo.attributes.aSize.needsUpdate = true;
+            renderer.render(scene, cam);
+            if (showLbls && !qOpen) drawL(); else lctx.clearRect(0, 0, lc.width, lc.height);
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           LABEL CANVAS
+        ═══════════════════════════════════════════════════════ */
+        const lc = document.getElementById("lc"), lctx = lc.getContext("2d");
+        lc.width = innerWidth; lc.height = innerHeight;
+
+        function w2s(wx, wy, wz) {
+            const v = new THREE.Vector3(wx, wy, wz);
+            v.applyEuler(pts.rotation); v.multiplyScalar(sc); v.project(cam);
+            return { x: (v.x + 1) / 2 * innerWidth, y: (-v.y + 1) / 2 * innerHeight, bh: v.z > 1 };
+        }
+        function h2rgb(h) { return `${parseInt(h.slice(1, 3), 16)},${parseInt(h.slice(3, 5), 16)},${parseInt(h.slice(5, 7), 16)}`; }
+
+        function drawL() {
+            lctx.clearRect(0, 0, lc.width, lc.height);
+            const m = M[curKey]; if (!m) return;
+            const S = 18, isMobile = innerWidth < 900;
+            // On mobile, hide labels if info panel is open
+            if (isMobile && document.getElementById("ip").classList.contains("open")) return;
+            m.parts.forEach((pt, i) => {
+                const s = w2s(pt.p[0] * S, pt.p[1] * S, pt.p[2] * S);
+                // Margin from sidebars
+                const leftMargin = (!isMobile && document.getElementById("sb").classList.contains("open")) ? parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sw")) + 10 : 10;
+                const rightMargin = (!isMobile && document.getElementById("ip").classList.contains("open")) ? parseInt(getComputedStyle(document.documentElement).getPropertyValue("--iw")) + 10 : 10;
+                if (s.bh || s.x < leftMargin || s.x > innerWidth - rightMargin || s.y < 58 || s.y > innerHeight - 36) return;
+                const hl = hlP === i, rgb = h2rgb(pt.c);
+                lctx.beginPath(); lctx.arc(s.x, s.y, hl ? 8 : 5.5, 0, Math.PI * 2);
+                lctx.fillStyle = pt.c; lctx.shadowColor = pt.c; lctx.shadowBlur = hl ? 22 : 12;
+                lctx.fill(); lctx.shadowBlur = 0;
+                if (hl) { lctx.beginPath(); lctx.arc(s.x, s.y, 13, 0, Math.PI * 2); lctx.strokeStyle = pt.c + "80"; lctx.lineWidth = 1.5; lctx.stroke(); }
+                lctx.font = `${hl ? 600 : 500} 11px 'Syne',sans-serif`;
+                const tw = lctx.measureText(pt.n).width, tW = tw + 18, tH = 22, gL = s.x > innerWidth / 2;
+                const lx = gL ? s.x - tW - 12 : s.x + 12, ly = s.y - tH / 2;
+                lctx.beginPath(); lctx.moveTo(s.x, s.y); lctx.lineTo(gL ? lx + tW : lx, ly + tH / 2);
+                lctx.strokeStyle = `rgba(${rgb},${hl ? .65 : .3})`; lctx.lineWidth = hl ? 1.5 : 1; lctx.stroke();
+                lctx.fillStyle = `rgba(2,2,12,${hl ? .97 : .88})`; rr(lctx, lx, ly, tW, tH, 5); lctx.fill();
+                lctx.strokeStyle = `rgba(${rgb},${hl ? .82 : .35})`; lctx.lineWidth = hl ? 1.5 : 1; rr(lctx, lx, ly, tW, tH, 5); lctx.stroke();
+                lctx.fillStyle = hl ? pt.c : `rgba(${rgb},.92)`; lctx.fillText(pt.n, lx + 9, ly + 15);
+            });
+        }
+        function rr(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath(); }
+
+        lc.style.pointerEvents = "auto";
+        lc.addEventListener("click", e => {
+            if (!showLbls || qOpen) return;
+            const m = M[curKey], S = 18;
+            m.parts.forEach((pt, i) => {
+                const s = w2s(pt.p[0] * S, pt.p[1] * S, pt.p[2] * S);
+                const dx = e.clientX - s.x, dy = e.clientY - s.y;
+                if (Math.sqrt(dx * dx + dy * dy) < 40) { hlP = hlP === i ? -1 : i; hlCard(i); }
+            });
+        });
+        function hlCard(i) {
+            document.querySelectorAll(".pc").forEach((el, j) => {
+                el.classList.toggle("hl", j === i && hlP === i);
+                if (j === i && hlP === i) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            });
+            if (!document.getElementById("ip").classList.contains("open")) {
+                document.getElementById("ip").classList.add("open");
+                document.getElementById("btnI").classList.add("on");
+                if (innerWidth < 900) document.getElementById("ham-right").classList.add("active");
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           UI
+        ═══════════════════════════════════════════════════════ */
+        function updTB(key) {
+            const m = M[key];
+            document.getElementById("tbi").textContent = m.icon;
+            document.getElementById("tbi").style.background = m.col + "20";
+            document.getElementById("tbc").textContent = m.subj;
+            document.getElementById("tbn").textContent = m.name;
+        }
+        function updIP(key) {
+            const m = M[key];
+            document.getElementById("ipic").textContent = m.icon;
+            document.getElementById("ipic").style.background = m.col + "20";
+            document.getElementById("ipn").textContent = m.name;
+            document.getElementById("ipc").textContent = m.cat;
+            document.getElementById("ipd").textContent = m.desc;
+            document.getElementById("stp").textContent = m.parts.length;
+            const pl = document.getElementById("plist"); pl.innerHTML = "";
+            m.parts.forEach((pt, i) => {
+                const d = document.createElement("div"); d.className = "pc";
+                d.innerHTML = `<div class="ph"><div class="pd2" style="background:${pt.c}"></div><div class="pn">${pt.n}</div></div><div class="pde">${pt.d}</div>`;
+                d.addEventListener("click", () => { hlP = hlP === i ? -1 : i; document.querySelectorAll(".pc").forEach((el, j) => el.classList.toggle("hl", j === i && hlP === i)); });
+                pl.appendChild(d);
+            });
+        }
+        function updSB(key) {
+            document.querySelectorAll(".mbt").forEach(b => b.classList.toggle("active", b.dataset.model === key));
+        }
+        function buildSB() {
+            const sl = document.getElementById("sl"); sl.innerHTML = "";
+            GROUPS.forEach(g => {
+                const gl = document.createElement("div"); gl.className = "gl"; gl.textContent = g.label; sl.appendChild(gl);
+                g.keys.forEach(k => {
+                    const m = M[k]; const btn = document.createElement("button"); btn.className = "mbt"; btn.dataset.model = k;
+                    btn.innerHTML = `<div class="mbi" style="background:${m.col}18;color:${m.col}">${m.icon}</div><span class="mbn">${m.name}</span><span class="mbc" style="background:${m.col}18;color:${m.col}">${m.parts.length}</span>`;
+                    btn.addEventListener("click", () => {
+                        loadM(k); toast(m.icon + " " + m.name);
+                        if (innerWidth < 900) { toggleSB(false); }
+                    });
+                    sl.appendChild(btn);
+                });
+            });
+        }
+        document.getElementById("si2").addEventListener("input", function () {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll(".mbt").forEach(b => {
+                const m = M[b.dataset.model];
+                b.style.display = (m.name.toLowerCase().includes(q) || b.dataset.model.includes(q)) ? "flex" : "none";
+            });
+        });
+
+        /* ═══════════════════════════════════════════════════════
+           HAMBURGER SIDEBAR LOGIC
+        ═══════════════════════════════════════════════════════ */
+        function toggleSB(force) {
+            const sb = document.getElementById("sb");
+            const hamL = document.getElementById("ham-left");
+            const overlay = document.getElementById("overlay");
+            const isMobile = innerWidth < 900;
+            const open = force !== undefined ? force : !sb.classList.contains("open");
+            sb.classList.toggle("open", open);
+            hamL.classList.toggle("active", open);
+            if (isMobile) {
+                overlay.classList.toggle("show", open);
+                // Close right panel if left opens
+                if (open) toggleIP(false);
+            }
+        }
+        function toggleIP(force) {
+            const ip = document.getElementById("ip");
+            const hamR = document.getElementById("ham-right");
+            const overlay = document.getElementById("overlay");
+            const isMobile = innerWidth < 900;
+            const open = force !== undefined ? force : !ip.classList.contains("open");
+            ip.classList.toggle("open", open);
+            document.getElementById("btnI").classList.toggle("on", open);
+            hamR.classList.toggle("active", open);
+            if (isMobile) {
+                overlay.classList.toggle("show", open);
+                if (open) toggleSB(false);
+            }
+        }
+
+        document.getElementById("ham-left").addEventListener("click", () => toggleSB());
+        document.getElementById("ham-right").addEventListener("click", () => toggleIP());
+        document.getElementById("overlay").addEventListener("click", () => { toggleSB(false); toggleIP(false); });
+
+        /* ═══════════════════════════════════════════════════════
+           QUIZ
+        ═══════════════════════════════════════════════════════ */
+        let qI = 0, qAns = false;
+        function startQ() {
+            const m = M[curKey]; qI = 0;
+            if (!m.quizzes?.length) { document.getElementById("qq").textContent = "No quiz for this model yet."; document.getElementById("qopts").innerHTML = ""; return; }
+            loadQ();
+        }
+        function loadQ() {
+            const m = M[curKey]; if (!m.quizzes?.length) return;
+            const q = m.quizzes[qI % m.quizzes.length]; qAns = false;
+            document.getElementById("qq").textContent = q.q;
+            document.getElementById("qbdg").textContent = `${(qI % m.quizzes.length) + 1}/${m.quizzes.length}`;
+            document.getElementById("qres").textContent = ""; document.getElementById("nq").style.display = "none";
+            const opts = document.getElementById("qopts"); opts.innerHTML = "";
+            q.opts.forEach((o, i) => {
+                const b = document.createElement("button"); b.className = "qo"; b.textContent = o;
+                b.addEventListener("click", () => {
+                    if (qAns) return; qAns = true;
+                    [...opts.children].forEach(c => c.disabled = true);
+                    if (i === q.a) { b.classList.add("ok"); document.getElementById("qres").innerHTML = '<span style="color:var(--green)">✓ Correct!</span>'; }
+                    else { b.classList.add("no"); opts.children[q.a].classList.add("ok"); document.getElementById("qres").innerHTML = '<span style="color:var(--red)">✗ Incorrect</span>'; }
+                    document.getElementById("nq").style.display = "block";
+                });
+                opts.appendChild(b);
+            });
+        }
+
+        // Quizzes
+        M.heart.quizzes = [{ q: "How many chambers does the human heart have?", opts: ["Two", "Three", "Four", "Five"], a: 2 }, { q: "Which vessel carries oxygenated blood from the lungs back to the heart?", opts: ["Aorta", "Pulmonary Artery", "Vena Cava", "Pulmonary Vein"], a: 3 }, { q: "What acts as the heart's natural pacemaker?", opts: ["AV Node", "SA Node", "Bundle of His", "Purkinje fibers"], a: 1 }];
+        M.brain.quizzes = [{ q: "Which part of the brain coordinates balance and movement?", opts: ["Cerebrum", "Cerebellum", "Brainstem", "Thalamus"], a: 1 }, { q: "The left hemisphere primarily controls which side?", opts: ["Right side of the body", "Left side of the body", "Involuntary breathing", "Hormones"], a: 0 }, { q: "What connects the two cerebral hemispheres?", opts: ["Medulla oblongata", "Corpus callosum", "Pons", "Amygdala"], a: 1 }];
+        M.lung.quizzes = [{ q: "Where does gas exchange occur in the lungs?", opts: ["Bronchi", "Trachea", "Alveoli", "Diaphragm"], a: 2 }, { q: "The right lung has how many lobes?", opts: ["One", "Two", "Three", "Four"], a: 2 }, { q: "Which muscle is primarily responsible for breathing?", opts: ["Intercostals", "Pectoralis major", "Diaphragm", "Abdominals"], a: 2 }];
+        M.eye.quizzes = [{ q: "Which part controls light entering the eye?", opts: ["Cornea", "Lens", "Retina", "Iris"], a: 3 }, { q: "Photoreceptors for color vision are called:", opts: ["Rods", "Cones", "Ganglion cells", "Bipolar cells"], a: 1 }, { q: "The blind spot occurs where:", opts: ["Fovea", "Optic disc", "Macula", "Ciliary body"], a: 1 }];
+        M.neuron.quizzes = [{ q: "How fast can signals travel in myelinated axons?", opts: ["1–2 m/s", "12 m/s", "70–120 m/s", "500 m/s"], a: 2 }, { q: "What does the myelin sheath do?", opts: ["Store neurotransmitters", "Speed up signal conduction", "Generate action potentials", "Receive synaptic input"], a: 1 }, { q: "Where does signal integration occur?", opts: ["Dendrites", "Axon hillock", "Synaptic terminal", "Nucleus"], a: 1 }];
+        M.kidney.quizzes = [{ q: "How much blood do kidneys filter per day?", opts: ["18L", "180L", "1,800L", "18,000L"], a: 1 }, { q: "Each kidney contains approximately how many nephrons?", opts: ["10,000", "100,000", "1 million", "10 million"], a: 2 }, { q: "Which hormone controls water reabsorption in collecting ducts?", opts: ["Insulin", "Cortisol", "ADH", "Aldosterone"], a: 2 }];
+        M.cell.quizzes = [{ q: "Primary function of mitochondria?", opts: ["DNA storage", "Protein synthesis", "ATP production", "Lipid breakdown"], a: 2 }, { q: "Which organelle packages proteins into vesicles?", opts: ["Ribosome", "Lysosome", "Golgi Apparatus", "Smooth ER"], a: 2 }, { q: "The cell membrane is composed of:", opts: ["Phospholipid bilayer", "Protein matrix", "Cellulose wall", "Cholesterol layer"], a: 0 }];
+        M.dna.quizzes = [{ q: "Which base pairs with Adenine (A) in DNA?", opts: ["Cytosine", "Guanine", "Thymine", "Uracil"], a: 2 }, { q: "What is the shape of DNA?", opts: ["Single strand", "Double helix", "Triple helix", "Circular"], a: 1 }, { q: "Which sugar is in the DNA backbone?", opts: ["Ribose", "Glucose", "Deoxyribose", "Fructose"], a: 2 }];
+        M.solarsystem.quizzes = [{ q: "Which planet is hottest?", opts: ["Mercury", "Venus", "Mars", "Jupiter"], a: 1 }, { q: "How long does sunlight take to reach Earth?", opts: ["1.2 seconds", "8.3 minutes", "1 hour", "24 hours"], a: 1 }, { q: "What separates inner rocky planets from gas giants?", opts: ["Kuiper Belt", "Oort Cloud", "Asteroid Belt", "Heliosphere"], a: 2 }];
+        M.blackhole.quizzes = [{ q: "The boundary beyond which nothing escapes is:", opts: ["Singularity", "Accretion Disk", "Photon Sphere", "Event Horizon"], a: 3 }, { q: "What is at the center of a black hole?", opts: ["A neutron star", "A singularity", "Empty space", "Dark matter"], a: 1 }, { q: "What powers accretion disk radiation?", opts: ["Nuclear fusion", "Friction and gravity", "Hawking radiation", "Magnetic reconnection"], a: 1 }];
+        M.galaxy.quizzes = [{ q: "What type of galaxy is the Milky Way?", opts: ["Elliptical", "Irregular", "Lenticular", "Barred Spiral"], a: 3 }, { q: "What is at the center of the Milky Way?", opts: ["A giant star cluster", "A supermassive black hole", "A quasar", "Nothing"], a: 1 }, { q: "Roughly how many stars in the Milky Way?", opts: ["1-4 billion", "100-400 billion", "1-4 trillion", "Over 100 trillion"], a: 1 }];
+        M.nebula.quizzes = [{ q: "The Pillars of Creation are made of:", opts: ["Solid rock", "Interstellar gas and dust", "Dark matter", "Millions of stars"], a: 1 }, { q: "H-alpha emission appears what color?", opts: ["Blue", "Green", "Red/Pink", "Yellow"], a: 2 }, { q: "What carves the shapes of nebulae?", opts: ["Magnetic fields", "Stellar winds and UV radiation", "Black hole gravity", "Supernova explosions"], a: 1 }];
+        M.atom.quizzes = [{ q: "How many protons does Carbon have?", opts: ["4", "6", "8", "12"], a: 1 }, { q: "Which particle has a negative charge?", opts: ["Proton", "Neutron", "Electron", "Photon"], a: 2 }, { q: "How many valence electrons does Carbon have?", opts: ["2", "4", "6", "8"], a: 1 }];
+        M.water.quizzes = [{ q: "What gives water its V-shape?", opts: ["Repulsion by hydrogens", "Large oxygen nucleus", "Two lone pairs of electrons", "High pressure"], a: 2 }, { q: "What is the H-O-H bond angle?", opts: ["90°", "104.5°", "109.5°", "180°"], a: 1 }, { q: "Water's strong surface tension is due to:", opts: ["Covalent bonds", "Ionic bonds", "Hydrogen bonds", "Van der Waals forces"], a: 2 }];
+        M.earth.quizzes = [{ q: "Earth's magnetic field is generated by:", opts: ["Inner core", "Outer core", "Mantle", "Crust"], a: 1 }, { q: "Which layer has the greatest volume?", opts: ["Crust", "Mantle", "Outer core", "Inner core"], a: 1 }, { q: "The soft layer allowing plate motion is:", opts: ["Lithosphere", "Asthenosphere", "Mesosphere", "Moho"], a: 1 }];
+        M.volcano.quizzes = [{ q: "A mix of superheated gas and rock is a:", opts: ["Lava flow", "Pyroclastic flow", "Lahar", "Ash fall"], a: 1 }, { q: "Stratovolcanoes have alternating layers of:", opts: ["Water and ice", "Granite and basalt", "Lava and pyroclastics", "Sandstone and shale"], a: 2 }, { q: "Magma that erupts onto the surface is called:", opts: ["Pumice", "Obsidian", "Lava", "Ash"], a: 2 }];
+        M.tectonic.quizzes = [{ q: "New oceanic crust forms at:", opts: ["Convergent boundary", "Transform fault", "Divergent boundary", "Subduction zone"], a: 2 }, { q: "The Mariana Trench formed at:", opts: ["A mid-ocean ridge", "A transform fault", "A convergent subduction boundary", "A divergent boundary"], a: 2 }, { q: "How fast do tectonic plates move?", opts: ["1mm per year", "2–15 cm per year", "1–2 meters per year", "10 meters per year"], a: 1 }];
+
+        document.getElementById("nq").addEventListener("click", () => { qI++; qAns = false; loadQ(); });
+
+        /* ═══════════════════════════════════════════════════════
+           TOAST
+        ═══════════════════════════════════════════════════════ */
+        let tT;
+        function toast(msg) {
+            const el = document.getElementById("toast"); el.textContent = msg;
+            el.classList.add("show"); clearTimeout(tT);
+            tT = setTimeout(() => el.classList.remove("show"), 2400);
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           HAND TRACKING
+        ═══════════════════════════════════════════════════════ */
+        const vid = document.getElementById("vid");
+        let hl = null, lvt = -1, camOn = false, smO = .25;
+        async function startCam() {
+            const bar = document.getElementById("cpb"), txt = document.getElementById("cst");
+            bar.style.width = "0%"; txt.textContent = "Requesting camera access…";
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 320 }, height: { ideal: 240 }, facingMode: "user" } });
+                vid.srcObject = stream; vid.style.display = "block";
+                await new Promise((res, rej) => { vid.onloadedmetadata = () => res(); vid.onerror = rej; setTimeout(() => rej(new Error("timeout")), 6000); });
+                await vid.play(); bar.style.width = "30%"; txt.textContent = "Camera ready ✓ — Loading AI model…";
+            } catch (err) { bar.style.background = "var(--red)"; txt.textContent = "⚠ Camera error: " + err.message; setTimeout(() => document.getElementById("cm").style.display = "none", 3000); return; }
+            try {
+                bar.style.width = "45%"; txt.textContent = "Loading hand-tracking model…";
+                const { FilesetResolver, HandLandmarker } = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs");
+                bar.style.width = "70%";
+                const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");
+                bar.style.width = "85%";
+                const opts = { baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task" }, runningMode: "VIDEO", numHands: 1 };
+                try { opts.baseOptions.delegate = "GPU"; hl = await HandLandmarker.createFromOptions(vision, opts); }
+                catch { opts.baseOptions.delegate = "CPU"; hl = await HandLandmarker.createFromOptions(vision, opts); }
+                bar.style.width = "100%"; await new Promise(r => setTimeout(r, 600));
+                document.getElementById("cm").style.display = "none"; camOn = true;
+                document.getElementById("cdot").classList.add("live"); document.getElementById("ctxt").textContent = "Hand tracking";
+                document.getElementById("btnC").classList.add("on"); document.getElementById("btnC").textContent = "✋ Live";
+                document.getElementById("rw").style.display = "block"; document.getElementById("gb").style.display = "flex";
+                toast("✋ Hand tracking active"); detectLoop();
+            } catch (err) { bar.style.background = "var(--red)"; txt.textContent = "⚠ AI model failed: " + err.message; setTimeout(() => document.getElementById("cm").style.display = "none", 4000); }
+        }
+        function pinch(lm) { const dx = lm[4].x - lm[8].x, dy = lm[4].y - lm[8].y; return Math.sqrt(dx * dx + dy * dy); }
+        function openness(lm) { let d = 0;[8, 12, 16, 20].forEach(t => { const dx = lm[t].x - lm[0].x, dy = lm[t].y - lm[0].y; d += Math.sqrt(dx * dx + dy * dy) }); return d / 4; }
+        function detectLoop() {
+            if (!hl) { requestAnimationFrame(detectLoop); return; }
+            if (vid.readyState >= 2 && vid.currentTime !== lvt) {
+                lvt = vid.currentTime; let res;
+                try { res = hl.detectForVideo(vid, performance.now()); } catch (e) { requestAnimationFrame(detectLoop); return; }
+                if (res.landmarks?.length) {
+                    const lm = res.landmarks[0]; tRX = (lm[0].y - .5) * Math.PI * .3; tRY = (lm[0].x - .5) * Math.PI * .5;
+                    const p = pinch(lm); tSC = Math.max(.4, Math.min(2.4, .5 + (1 - Math.min(p, .28) / .28) * 1.8));
+                    const raw = openness(lm); smO += (raw - smO) * .2; const pct = Math.max(0, Math.min(1, (smO - .12) / .32));
+                    document.getElementById("rfi").style.strokeDashoffset = 144.5 - (144.5 * pct);
+                    document.getElementById("rvl").textContent = Math.round(pct * 100);
+                    document.getElementById("cdot").classList.add("live"); document.getElementById("ctxt").textContent = `Zoom ${tSC.toFixed(1)}×`;
+                } else { document.getElementById("cdot").classList.remove("live"); document.getElementById("ctxt").textContent = "No hand detected"; }
+            }
+            requestAnimationFrame(detectLoop);
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           BUTTONS
+        ═══════════════════════════════════════════════════════ */
+        document.getElementById("btnC").addEventListener("click", () => { document.getElementById("cm").style.display = "flex"; startCam(); });
+        document.getElementById("ccan").addEventListener("click", () => document.getElementById("cm").style.display = "none");
+        document.getElementById("btnL").addEventListener("click", function () { showLbls = !showLbls; this.classList.toggle("on", showLbls); if (!showLbls) lctx.clearRect(0, 0, lc.width, lc.height); toast(showLbls ? "Labels on" : "Labels off"); });
+        document.getElementById("btnQ").addEventListener("click", function () { qOpen = !qOpen; this.classList.toggle("on", qOpen); document.getElementById("qp").style.display = qOpen ? "block" : "none"; if (qOpen) { startQ(); lctx.clearRect(0, 0, lc.width, lc.height); } toast(qOpen ? "Quiz mode on" : "Quiz mode off"); });
+        document.getElementById("btnI").addEventListener("click", function () { toggleIP(); });
+        document.getElementById("cip").addEventListener("click", () => toggleIP(false));
+
+        /* ═══════════════════════════════════════════════════════
+           MOUSE / TOUCH CONTROL
+        ═══════════════════════════════════════════════════════ */
+        let isDrag = false, lx = 0, ly = 0;
+        document.addEventListener("mousedown", e => { if (camOn || (e.target !== cv && e.target !== lc)) return; isDrag = true; lx = e.clientX; ly = e.clientY; });
+        document.addEventListener("mousemove", e => { if (!isDrag || camOn) return; tRY += (e.clientX - lx) * 0.005; tRX += (e.clientY - ly) * 0.005; lx = e.clientX; ly = e.clientY; });
+        document.addEventListener("mouseup", () => isDrag = false);
+        document.addEventListener("wheel", e => { if (camOn || (e.target !== cv && e.target !== lc)) return; tSC = Math.max(0.35, Math.min(4.2, tSC - e.deltaY * 0.002)); });
+
+        // Touch controls
+        let lastTouchDist = 0, lastTX = 0, lastTY = 0;
+        cv.addEventListener("touchstart", e => { e.preventDefault(); if (e.touches.length === 1) { lastTX = e.touches[0].clientX; lastTY = e.touches[0].clientY; } else if (e.touches.length === 2) { const dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY; lastTouchDist = Math.sqrt(dx * dx + dy * dy); } }, { passive: false });
+        cv.addEventListener("touchmove", e => { e.preventDefault(); if (e.touches.length === 1) { const dx = e.touches[0].clientX - lastTX, dy = e.touches[0].clientY - lastTY; tRY += dx * 0.006; tRX += dy * 0.006; lastTX = e.touches[0].clientX; lastTY = e.touches[0].clientY; } else if (e.touches.length === 2) { const dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY; const dist = Math.sqrt(dx * dx + dy * dy); const delta = dist - lastTouchDist; tSC = Math.max(.35, Math.min(4.2, tSC + delta * 0.008)); lastTouchDist = dist; } }, { passive: false });
+
+        /* ═══════════════════════════════════════════════════════
+           KEYBOARD
+        ═══════════════════════════════════════════════════════ */
+        document.addEventListener("keydown", e => {
+            if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
+            if (e.key === "l" || e.key === "L") document.getElementById("btnL").click();
+            if (e.key === "q" || e.key === "Q") document.getElementById("btnQ").click();
+            if (e.key === "i" || e.key === "I") document.getElementById("btnI").click();
+            if (e.key === "Escape") { toggleIP(false); if (qOpen) document.getElementById("btnQ").click(); }
+            const ci = ALL_KEYS.indexOf(curKey);
+            if (e.key === "ArrowRight" && ci < ALL_KEYS.length - 1) { loadM(ALL_KEYS[ci + 1]); toast("→ " + M[ALL_KEYS[ci + 1]].name); }
+            if (e.key === "ArrowLeft" && ci > 0) { loadM(ALL_KEYS[ci - 1]); toast("← " + M[ALL_KEYS[ci - 1]].name); }
+        });
+
+        /* ═══════════════════════════════════════════════════════
+           LAUNCH
+        ═══════════════════════════════════════════════════════ */
+        document.getElementById("lbtn").addEventListener("click", () => {
+            const sp = document.getElementById("splash"); sp.style.opacity = "0";
+            setTimeout(() => {
+                sp.style.display = "none"; buildSB();
+                document.getElementById("sb").style.display = "flex";
+                document.getElementById("tb").style.display = "flex";
+                document.getElementById("ip").style.display = "flex";
+                document.getElementById("ham-left").style.display = "flex";
+                document.getElementById("ham-right").style.display = "flex";
+                document.getElementById("kh").style.display = "block";
+                loadM("heart", true); animate();
+                // Desktop: open both panels; mobile: closed by default
+                const isMobile = innerWidth < 900;
+                if (!isMobile) {
+                    document.getElementById("sb").classList.add("open");
+                    setTimeout(() => { toggleIP(true); document.getElementById("btnI").classList.add("on"); }, 400);
+                } else {
+                    // Show ham buttons, keep panels closed
+                    toast("Tap ☰ for models · Tap ≡ for info");
+                }
+            }, 700);
+        });
+    </script>
 </body>
+
 </html>
