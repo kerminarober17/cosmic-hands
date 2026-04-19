@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stellar Morph</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;overflow:hidden;font-family:'SF Pro Display',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+#c{display:block;width:100vw;height:100vh}
+#vid{position:absolute;top:24px;right:24px;width:140px;height:105px;border:1px solid rgba(255,255,255,0.08);border-radius:16px;transform:scaleX(-1);opacity:0.45;z-index:10;transition:opacity 0.4s;object-fit:cover}
+#vid:hover{opacity:0.9}
+#hud{position:absolute;top:24px;left:24px;z-index:10;pointer-events:none}
+#hud-inner{background:rgba(8,8,12,0.72);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:18px 22px;backdrop-filter:blur(20px) saturate(1.5);min-width:210px}
+#shapeName{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:4px;font-weight:500}
+#shapeLabel{font-size:22px;font-weight:300;color:#fff;letter-spacing:1px;margin-bottom:14px}
+.stat-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.stat-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.stat-text{font-size:12px;color:rgba(255,255,255,0.5);letter-spacing:0.3px}
+.stat-val{font-size:12px;color:rgba(255,255,255,0.8);margin-left:auto;font-variant-numeric:tabular-nums}
+#divider{width:100%;height:1px;background:rgba(255,255,255,0.06);margin:12px 0}
+#gestureState{font-size:13px;font-weight:500;letter-spacing:0.5px;margin-bottom:3px;color:#fff}
+#gestureHint{font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.3px}
+#progressBar{width:100%;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:14px;overflow:hidden}
+#progressFill{height:100%;border-radius:2px;transition:width 0.15s ease,background 0.5s ease;width:50%;background:#f97316}
+#legend{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:10}
+.legend-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;border:1px solid rgba(255,255,255,0.08);border-radius:100px;cursor:default;transition:all 0.3s;background:rgba(8,8,12,0.6);backdrop-filter:blur(10px)}
+.legend-btn.active{border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.06)}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+.legend-label{font-size:12px;color:rgba(255,255,255,0.55);letter-spacing:1.5px;text-transform:uppercase;font-weight:500}
+.legend-btn.active .legend-label{color:rgba(255,255,255,0.9)}
+#overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 40% 50%, #0d0d1f 0%, #000 70%)}
+#overlay-content{text-align:center;max-width:480px;padding:40px}
+#logo{font-size:11px;letter-spacing:5px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:24px;font-weight:500}
+#title{font-size:52px;font-weight:200;color:#fff;letter-spacing:-1px;line-height:1.1;margin-bottom:20px}
+#title span{font-weight:500;background:linear-gradient(135deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+#subtitle{font-size:16px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:40px;font-weight:300}
+#startBtn{display:inline-flex;align-items:center;gap:12px;padding:16px 40px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.85);font-size:14px;letter-spacing:2px;cursor:pointer;border-radius:100px;transition:all 0.3s ease;text-transform:uppercase;font-family:inherit;font-weight:500}
+#startBtn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.4);color:#fff;transform:translateY(-1px)}
+#startBtn:active{transform:translateY(0)}
+.btn-icon{width:18px;height:18px;border:1.5px solid currentColor;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.btn-icon::after{content:'';display:block;width:0;height:0;border-style:solid;border-width:4px 0 4px 7px;border-color:transparent transparent transparent currentColor;margin-left:2px}
+#gesture-guide{display:flex;gap:24px;margin-top:40px;padding-top:32px;border-top:1px solid rgba(255,255,255,0.06)}
+.gesture-item{flex:1;text-align:center}
+.gesture-icon{font-size:28px;margin-bottom:8px;display:block}
+.gesture-name{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:3px}
+.gesture-desc{font-size:12px;color:rgba(255,255,255,0.45)}
+#loading-bar{position:fixed;bottom:0;left:0;height:2px;background:linear-gradient(90deg,#a78bfa,#60a5fa);z-index:100;transition:width 0.3s ease;width:0%;opacity:1}
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+<video id="vid" autoplay playsinline muted style="display:none"></video>
+
+<div id="hud" style="display:none">
+  <div id="hud-inner">
+    <div id="shapeName">Current Form</div>
+    <div id="shapeLabel">Planet</div>
+    <div class="stat-row">
+      <div class="stat-dot" style="background:#a78bfa"></div>
+      <div class="stat-text">Openness</div>
+      <div class="stat-val" id="opennessVal">—</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-dot" style="background:#60a5fa"></div>
+      <div class="stat-text">Zoom scale</div>
+      <div class="stat-val" id="scaleVal">1.0×</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-dot" style="background:#34d399"></div>
+      <div class="stat-text">Hand</div>
+      <div class="stat-val" id="handVal">Tracking</div>
+    </div>
+    <div id="divider"></div>
+    <div id="gestureState">Initializing…</div>
+    <div id="gestureHint">Show your hand to begin</div>
+    <div id="progressBar"><div id="progressFill"></div></div>
+  </div>
+</div>
+
+<div id="legend" style="display:none">
+  <div class="legend-btn active" id="btn-planet">
+    <div class="legend-dot" style="background:#f97316"></div>
+    <span class="legend-label">Planet</span>
+  </div>
+  <div class="legend-btn" id="btn-nebula">
+    <div class="legend-dot" style="background:#a78bfa"></div>
+    <span class="legend-label">Nebula</span>
+  </div>
+  <div class="legend-btn" id="btn-galaxy">
+    <div class="legend-dot" style="background:#60a5fa"></div>
+    <span class="legend-label">Galaxy</span>
+  </div>
+</div>
+
+<div id="overlay">
+  <div id="overlay-content">
+    <div id="logo">Cosmos × Interactive</div>
+    <div id="title">Stellar<br><span>Morph</span></div>
+    <div id="subtitle">Shape the universe with your hand. Open your palm to expand a galaxy, close your fist to condense a planet.</div>
+    <button id="startBtn">
+      <span class="btn-icon"></span>
+      Initialize
+    </button>
+    <div id="gesture-guide">
+      <div class="gesture-item">
+        <span class="gesture-icon">✋</span>
+        <div class="gesture-name">Open</div>
+        <div class="gesture-desc">Galaxy form</div>
+      </div>
+      <div class="gesture-item">
+        <span class="gesture-icon">✊</span>
+        <div class="gesture-name">Closed</div>
+        <div class="gesture-desc">Planet form</div>
+      </div>
+      <div class="gesture-item">
+        <span class="gesture-icon">🤌</span>
+        <div class="gesture-name">Pinch</div>
+        <div class="gesture-desc">Zoom control</div>
+      </div>
+      <div class="gesture-item">
+        <span class="gesture-icon">👋</span>
+        <div class="gesture-name">Move</div>
+        <div class="gesture-desc">Rotate view</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="loading-bar"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script type="module">
+import { FilesetResolver, HandLandmarker } from
+  "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.mjs";
+
+/* ─────────────────────────────────────────────
+   CONSTANTS & DOM
+───────────────────────────────────────────── */
+const N       = 18000;
+const canvas  = document.getElementById("c");
+const vid     = document.getElementById("vid");
+const overlay = document.getElementById("overlay");
+const hud     = document.getElementById("hud");
+const legend  = document.getElementById("legend");
+const loadingBar = document.getElementById("loading-bar");
+
+/* ─────────────────────────────────────────────
+   THREE.JS RENDERER
+───────────────────────────────────────────── */
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setClearColor(0x000005, 1);
+
+const scene  = new THREE.Scene();
+scene.fog    = new THREE.FogExp2(0x000005, 0.004);
+
+const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 3000);
+camera.position.set(0, 20, 80);
+camera.lookAt(0, 0, 0);
+
+window.addEventListener("resize", () => {
+  renderer.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+});
+
+/* ─────────────────────────────────────────────
+   BACKGROUND STAR FIELD
+───────────────────────────────────────────── */
+const starGeo = new THREE.BufferGeometry();
+const sPos    = new Float32Array(3000 * 3);
+for (let i = 0; i < 3000; i++) {
+  const r  = 400 + Math.random() * 600;
+  const th = Math.random() * Math.PI * 2;
+  const ph = Math.acos(2 * Math.random() - 1);
+  sPos[i*3]   = r * Math.sin(ph) * Math.cos(th);
+  sPos[i*3+1] = r * Math.cos(ph);
+  sPos[i*3+2] = r * Math.sin(ph) * Math.sin(th);
+}
+starGeo.setAttribute("position", new THREE.BufferAttribute(sPos, 3));
+const starMat = new THREE.PointsMaterial({
+  color: 0xffffff, size: 0.6, sizeAttenuation: true,
+  transparent: true, opacity: 0.45
+});
+scene.add(new THREE.Points(starGeo, starMat));
+
+/* ─────────────────────────────────────────────
+   MAIN PARTICLE SHADER
+───────────────────────────────────────────── */
+const vertexShader = `
+  attribute float aSize;
+  attribute vec3  aColor;
+  attribute float aPhase;
+  varying   vec3  vColor;
+  varying   float vAlpha;
+  uniform   float uTime;
+
+  void main() {
+    vColor = aColor;
+    float pulse = 0.85 + 0.15 * sin(uTime * 2.0 + aPhase);
+    vAlpha = pulse;
+    vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+    gl_PointSize = aSize * pulse * (350.0 / -mvPos.z);
+    gl_Position  = projectionMatrix * mvPos;
+  }
+`;
+
+const fragmentShader = `
+  varying vec3  vColor;
+  varying float vAlpha;
+
+  void main() {
+    vec2  uv   = gl_PointCoord - 0.5;
+    float r    = dot(uv, uv);
+    if (r > 0.25) discard;
+    float core = exp(-r * 30.0);
+    float mid  = exp(-r * 12.0) * 0.5;
+    float glow = exp(-r *  4.0) * 0.15;
+    float a    = (core + mid + glow) * vAlpha;
+    gl_FragColor = vec4(vColor * (core + mid + glow) * 1.2, a);
+  }
+`;
+
+/* ─────────────────────────────────────────────
+   PARTICLE GEOMETRY
+───────────────────────────────────────────── */
+const geo       = new THREE.BufferGeometry();
+const positions = new Float32Array(N * 3);
+const colors    = new Float32Array(N * 3);
+const sizes     = new Float32Array(N);
+const phases    = new Float32Array(N);
+
+for (let i = 0; i < N; i++) {
+  const r  = 100 + Math.random() * 80;
+  const th = Math.random() * Math.PI * 2;
+  const ph = Math.acos(2 * Math.random() - 1);
+  positions[i*3]   = r * Math.sin(ph) * Math.cos(th);
+  positions[i*3+1] = r * Math.cos(ph);
+  positions[i*3+2] = r * Math.sin(ph) * Math.sin(th);
+  sizes[i]    = 0.4 + Math.random() * 1.8;
+  phases[i]   = Math.random() * Math.PI * 2;
+  colors[i*3] = colors[i*3+1] = colors[i*3+2] = 1;
+}
+
+geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+geo.setAttribute("aColor",   new THREE.BufferAttribute(colors,    3));
+geo.setAttribute("aSize",    new THREE.BufferAttribute(sizes,     1));
+geo.setAttribute("aPhase",   new THREE.BufferAttribute(phases,    1));
+
+const mat = new THREE.ShaderMaterial({
+  vertexShader, fragmentShader,
+  uniforms: { uTime: { value: 0 } },
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+});
+
+const points = new THREE.Points(geo, mat);
+scene.add(points);
+
+/* ─────────────────────────────────────────────
+   SHAPE GENERATORS
+───────────────────────────────────────────── */
+function generatePlanet(i) {
+  const isRing = i % 4 !== 0;
+  if (isRing) {
+    const a    = Math.random() * Math.PI * 2;
+    const band = Math.floor(Math.random() * 3);
+    const radii = [[20, 28], [30, 36], [38, 44]];
+    const [rMin, rMax] = radii[band];
+    const rad  = rMin + Math.random() * (rMax - rMin);
+    const tilt = (Math.random() - 0.5) * 0.25 + (Math.random() - 0.5) * 0.08;
+    const cols = [[0.4, 0.7, 1.0], [0.8, 0.6, 1.0], [1.0, 0.85, 0.5]];
+    const [cr, cg, cb] = cols[band];
+    const bright = 0.7 + Math.random() * 0.3;
+    return {
+      pos: [Math.cos(a) * rad, tilt, Math.sin(a) * rad],
+      col: [cr * bright, cg * bright, cb * bright],
+      sz:  0.3 + Math.random() * 0.9
+    };
+  } else {
+    const u     = Math.random(), v = Math.random();
+    const theta = u * Math.PI * 2;
+    const phi   = Math.acos(2 * v - 1);
+    const rad   = 14 * Math.cbrt(Math.random() * 0.8 + 0.2);
+    const t     = rad / 14;
+    let cr, cg, cb;
+    if (t < 0.4)      { cr = 0.7 + t; cg = 0.8 + t * 0.4; cb = 1.0; }
+    else if (t < 0.7) { cr = 1.0;     cg = 0.5 + t * 0.3;  cb = 0.3 - t * 0.2; }
+    else              { cr = 1.0;     cg = 0.35 - t * 0.1;  cb = 0.1; }
+    return {
+      pos: [
+        rad * Math.sin(phi) * Math.cos(theta),
+        rad * Math.cos(phi),
+        rad * Math.sin(phi) * Math.sin(theta)
+      ],
+      col: [cr, cg, cb],
+      sz:  0.5 + Math.random() * 1.2
+    };
+  }
+}
+
+function generateNebula(i) {
+  const arm      = i % 5;
+  const armAngle = (arm / 5) * Math.PI * 2;
+  const dist     = 5 + Math.pow(Math.random(), 1.5) * 40;
+  const twist    = dist * 0.08;
+  const a        = armAngle + twist + (Math.random() - 0.5) * 0.6;
+  const spread   = 8 + dist * 0.35;
+  const x  = Math.cos(a) * dist + (Math.random() - 0.5) * spread;
+  const y  = (Math.random() - 0.5) * (spread * 0.4) + (Math.random() - 0.5) * 4;
+  const z  = Math.sin(a) * dist + (Math.random() - 0.5) * spread;
+  const t  = dist / 40;
+  let cr, cg, cb;
+  const type = arm % 3;
+  if      (type === 0) { cr = 0.9 - t * 0.3; cg = 0.2 + t * 0.5; cb = 0.7 + t * 0.2; }
+  else if (type === 1) { cr = 0.6 + t * 0.2; cg = 0.1;            cb = 1.0 - t * 0.3; }
+  else                 { cr = 0.2;            cg = 0.6 + t * 0.3;  cb = 0.9 - t * 0.2; }
+  const bright = 0.6 + Math.random() * 0.4;
+  return {
+    pos: [x, y, z],
+    col: [cr * bright, cg * bright, cb * bright],
+    sz:  0.4 + Math.random() * 2.0
+  };
+}
+
+function generateGalaxy(i) {
+  const arms   = 5;
+  const maxR   = 48;
+  const rad    = Math.pow(Math.random(), 1.8) * maxR;
+  const armIdx = i % arms;
+  const angle  = rad * 0.18 + (armIdx / arms) * Math.PI * 2;
+  const disp   = (Math.random() - 0.5);
+  const dScale = (maxR - rad) * 0.1;
+  const x  = Math.cos(angle) * rad + disp * dScale * 12;
+  const y  = (rad < 10 ? 5 : 0.8) * (Math.random() - 0.5) + (Math.random() - 0.5) * 1.5;
+  const z  = Math.sin(angle) * rad + disp * dScale * 12;
+  const t  = rad / maxR;
+  let cr, cg, cb;
+  if      (t < 0.15) { cr = 1.0;          cg = 0.95;          cb = 1.0; }
+  else if (t < 0.5)  { cr = 0.4 + t;      cg = 0.5 + t * 0.3; cb = 1.0; }
+  else               { cr = 0.9 + t * 0.1; cg = 0.65 - t * 0.2; cb = 0.3 - t * 0.15; }
+  const bright = Math.max(0, (1 - t * 0.4)) * (0.7 + Math.random() * 0.3);
+  return {
+    pos: [x, y, z],
+    col: [cr * bright, cg * bright, cb * bright],
+    sz:  0.3 + Math.random() * 1.5
+  };
+}
+
+const SHAPES      = [generatePlanet, generateNebula, generateGalaxy];
+const SHAPE_NAMES = ["Planet", "Nebula", "Galaxy"];
+const SHAPE_COLS  = ["#f97316", "#a78bfa", "#60a5fa"];
+
+/* ─────────────────────────────────────────────
+   MORPH STATE
+───────────────────────────────────────────── */
+let currentShape    = 0;
+let targetPositions = new Float32Array(N * 3);
+let targetColors    = new Float32Array(N * 3);
+let targetSizes     = new Float32Array(N);
+let lerpT           = 1.0;
+let scale = 1, targetScale = 1;
+let rotX = 0, rotY = 0, targetRotX = 0, targetRotY = 0;
+let clock           = 0;
+let prevOpenness    = 0;
+
+function buildTargets(idx) {
+  for (let i = 0; i < N; i++) {
+    const d = SHAPES[idx](i);
+    targetPositions[i*3]   = d.pos[0];
+    targetPositions[i*3+1] = d.pos[1];
+    targetPositions[i*3+2] = d.pos[2];
+    targetColors[i*3]      = d.col[0];
+    targetColors[i*3+1]    = d.col[1];
+    targetColors[i*3+2]    = d.col[2];
+    targetSizes[i]         = d.sz || 1;
+  }
+}
+buildTargets(0);
+// Seed initial positions
+for (let i = 0; i < N * 3; i++) {
+  positions[i] = targetPositions[i];
+  colors[i]    = targetColors[i];
+}
+
+function setShape(idx) {
+  if (idx === currentShape) return;
+  currentShape = idx;
+  buildTargets(idx);
+  lerpT = 0;
+  document.getElementById("shapeLabel").textContent = SHAPE_NAMES[idx];
+  const btns = ["btn-planet", "btn-nebula", "btn-galaxy"];
+  btns.forEach((id, i) => document.getElementById(id).classList.toggle("active", i === idx));
+  document.getElementById("progressFill").style.background = SHAPE_COLS[idx];
+  document.getElementById("gestureState").style.color      = SHAPE_COLS[idx];
+}
+
+function easeInOut(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+/* ─────────────────────────────────────────────
+   ANIMATION LOOP
+───────────────────────────────────────────── */
+function animate() {
+  requestAnimationFrame(animate);
+  clock += 0.004;
+  mat.uniforms.uTime.value = clock * 4;
+
+  // Smooth camera rotation
+  rotX += (targetRotX - rotX) * 0.04;
+  rotY += (targetRotY - rotY) * 0.04;
+  points.rotation.x = rotX + Math.sin(clock) * 0.06;
+  points.rotation.y = rotY + clock * 0.25;
+
+  // Smooth zoom
+  scale += (targetScale - scale) * 0.07;
+  points.scale.setScalar(scale);
+
+  const pos = geo.attributes.position.array;
+  const col = geo.attributes.aColor.array;
+  const sz  = geo.attributes.aSize.array;
+
+  if (lerpT < 1) {
+    lerpT = Math.min(1, lerpT + 0.012);
+    const e = easeInOut(lerpT);
+    for (let i = 0; i < N * 3; i++) {
+      pos[i] += (targetPositions[i] - pos[i]) * (0.05 + e * 0.03);
+      col[i] += (targetColors[i]    - col[i]) * 0.04;
+    }
+    for (let i = 0; i < N; i++) sz[i] += (targetSizes[i] - sz[i]) * 0.05;
+  } else {
+    // Idle organic turbulence
+    const amp = currentShape === 1 ? 0.12 : 0.04;
+    for (let i = 0; i < N; i++) {
+      const idx = i * 3;
+      const t2  = clock * 3 + i * 0.008;
+      pos[idx]   += (targetPositions[idx]   + Math.sin(t2)         * amp - pos[idx])   * 0.035;
+      pos[idx+1] += (targetPositions[idx+1] + Math.cos(t2 * 0.9)   * amp - pos[idx+1]) * 0.035;
+      pos[idx+2] += (targetPositions[idx+2] + Math.sin(t2 * 1.1)   * amp - pos[idx+2]) * 0.035;
+    }
+  }
+
+  geo.attributes.position.needsUpdate = true;
+  geo.attributes.aColor.needsUpdate   = true;
+  geo.attributes.aSize.needsUpdate    = true;
+  renderer.render(scene, camera);
+}
+
+/* ─────────────────────────────────────────────
+   MEDIAPIPE HAND TRACKING
+───────────────────────────────────────────── */
+let handLandmarker = null;
+let lastVideoTime  = -1;
+
+async function initMediaPipe() {
+  loadingBar.style.width = "30%";
+  const vision = await FilesetResolver.forVisionTasks(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+  );
+  loadingBar.style.width = "65%";
+  handLandmarker = await HandLandmarker.createFromOptions(vision, {
+    baseOptions: {
+      modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+      delegate: "GPU"
+    },
+    runningMode: "VIDEO",
+    numHands: 1
+  });
+  loadingBar.style.width = "100%";
+  setTimeout(() => { loadingBar.style.opacity = "0"; }, 500);
+  hud.style.display    = "block";
+  legend.style.display = "flex";
+  setShape(0);
+  detect();
+}
+
+function handOpenness(lm) {
+  const wrist = lm[0];
+  const tips  = [8, 12, 16, 20];
+  let d = 0;
+  tips.forEach(t => {
+    const dx = lm[t].x - wrist.x;
+    const dy = lm[t].y - wrist.y;
+    d += Math.sqrt(dx * dx + dy * dy);
+  });
+  return d / 4;
+}
+
+function pinchDist(lm) {
+  const dx = lm[4].x - lm[8].x;
+  const dy = lm[4].y - lm[8].y;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function detect() {
+  if (!handLandmarker || vid.readyState < 2) {
+    requestAnimationFrame(detect);
+    return;
+  }
+  const now = performance.now();
+  if (vid.currentTime !== lastVideoTime) {
+    lastVideoTime = vid.currentTime;
+    const res = handLandmarker.detectForVideo(vid, now);
+
+    if (res.landmarks && res.landmarks.length > 0) {
+      const lm = res.landmarks[0];
+
+      // Rotation from wrist position
+      targetRotX = (lm[0].y - 0.5) * Math.PI * 0.3;
+      targetRotY = (lm[0].x - 0.5) * Math.PI * 0.5;
+
+      // Pinch → zoom
+      const pinch = pinchDist(lm);
+      targetScale = Math.max(0.3, Math.min(2.5,
+        0.4 + (1 - Math.min(pinch, 0.28) / 0.28) * 2.0
+      ));
+
+      // Smooth openness
+      const rawOpen = handOpenness(lm);
+      prevOpenness += (rawOpen - prevOpenness) * 0.2;
+
+      // Three-zone gesture mapping
+      if      (prevOpenness > 0.38) setShape(2); // galaxy
+      else if (prevOpenness < 0.20) setShape(0); // planet
+      else if (prevOpenness > 0.27) setShape(1); // nebula
+
+      // Update HUD
+      const pct = Math.round(((prevOpenness - 0.15) / 0.30) * 100);
+      document.getElementById("progressFill").style.width  = Math.max(2, Math.min(100, pct)) + "%";
+      document.getElementById("opennessVal").textContent   = (prevOpenness * 100).toFixed(0) + "%";
+      document.getElementById("scaleVal").textContent      = targetScale.toFixed(1) + "×";
+      document.getElementById("handVal").textContent       = "Active";
+      if (prevOpenness > 0.38) {
+        document.getElementById("gestureState").textContent = "Expanding galaxy";
+        document.getElementById("gestureHint").textContent  = "Spiral arms forming";
+      } else if (prevOpenness < 0.20) {
+        document.getElementById("gestureState").textContent = "Condensing planet";
+        document.getElementById("gestureHint").textContent  = "Core collapse in progress";
+      } else {
+        document.getElementById("gestureState").textContent = "Forming nebula";
+        document.getElementById("gestureHint").textContent  = "Stellar nursery active";
+      }
+    } else {
+      document.getElementById("gestureState").textContent = "No hand detected";
+      document.getElementById("gestureHint").textContent  = "Show your hand to the camera";
+      document.getElementById("handVal").textContent      = "Searching…";
+      document.getElementById("progressFill").style.width = "0%";
+    }
+  }
+  requestAnimationFrame(detect);
+}
+
+/* ─────────────────────────────────────────────
+   START
+───────────────────────────────────────────── */
+document.getElementById("startBtn").addEventListener("click", async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 320, height: 240, facingMode: "user" }
+    });
+    vid.srcObject = stream;
+    vid.style.display = "block";
+    await vid.play();
+    overlay.style.transition = "opacity 0.6s ease";
+    overlay.style.opacity    = "0";
+    setTimeout(() => { overlay.style.display = "none"; }, 600);
+    animate();
+    await initMediaPipe();
+  } catch (e) {
+    alert("Camera access is required. Please allow camera permissions and reload the page.");
+  }
+});
+</script>
+</body>
+</html>
